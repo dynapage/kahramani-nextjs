@@ -1,0 +1,76 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #f1f4f3;
+  --foreground: #fdf5a6;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+/* BALTIC HERO ANIMATIONS */
+@keyframes baltic-pan {
+  0% { transform: translateX(0); }
+  50% { transform: translateX(-1.5%); } /* very subtle */
+  100% { transform: translateX(0); }
+}
+
+@keyframes amber-float-1 {
+  0%   { transform: translateY(0); }
+  50%  { transform: translateY(-6px); }
+  100% { transform: translateY(0); }
+}
+
+@keyframes amber-float-2 {
+  0%   { transform: translateY(0); }
+  50%  { transform: translateY(4px); }
+  100% { transform: translateY(0); }
+}
+
+@keyframes amber-float-3 {
+  0%   { transform: translateY(0); }
+  50%  { transform: translateY(-4px); }
+  100% { transform: translateY(0); }
+}
+
+@keyframes snow-fall {
+  0%   { transform: translateY(-10%); opacity: 0; }
+  10%  { opacity: 0.7; }
+  100% { transform: translateY(110%); opacity: 0; }
+}
+
+.animate-baltic-pan {
+  animation: baltic-pan 30s ease-in-out infinite;
+}
+
+.animate-amber-float-1 {
+  animation: amber-float-1 8s ease-in-out infinite;
+}
+
+.animate-amber-float-2 {
+  animation: amber-float-2 10s ease-in-out infinite;
+}
+
+.animate-amber-float-3 {
+  animation: amber-float-3 9s ease-in-out infinite;
+}
+
+/* quick simple snow layers */
+.snow {
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle, rgba(255,255,255,0.2) 0, rgba(255,255,255,0) 5%);
+  background-size: 3px 3px;
+  opacity: 0.2;
+  animation: snow-fall 18s linear infinite;
+}
+
+.snow-2 {
+  animation-duration: 26s;
+  opacity: 0.1;
+}
