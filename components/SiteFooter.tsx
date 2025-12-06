@@ -4,8 +4,9 @@ export function SiteFooter() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="bg-[#07201c] py-4">
-      <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-4 text-[0.75rem] text-kahra_cream/70 md:flex-row">
+    // Lighter footer with neutral background and dark text
+    <footer className="bg-[#f8f8f8] py-4">
+      <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-4 text-[0.75rem] text-gray-600 md:flex-row">
         <p>© {year} Kahramani · كهرماني – All rights reserved.</p>
         <div className="flex items-center gap-4">
           <a
