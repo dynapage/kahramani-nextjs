@@ -44,7 +44,16 @@ export function SiteHeader({ lang }: HeaderProps) {
       <div className="mx-auto flex max-w-6xl items-center justify-between px-2 py-2">
         <Link href={buildLink("/")}> 
           <div className="flex items-center gap-3">
-            
+             <div className="Relative h-20 w-136 overflow-hidden">
+             
+               {/* <Image
+                src="/images/kahramani-logo.svg"
+                alt="Kahramani logo"
+                fill
+                className="object-contain p-1.5"
+                priority
+              /> */}
+            </div>
           </div>
         </Link>
 
