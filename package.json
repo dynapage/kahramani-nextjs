@@ -6,9 +6,11 @@
     "dev": "next dev -p 3001",
     "build": "next build",
     "start": "next start",
+    "export": "next build",
     "lint": "next lint"
   },
   "dependencies": {
+    "@types/nodemailer": "^7.0.4",
     "next": "^16.0.5",
     "nodemailer": "^6.9.15",
     "react": "18.2.0",
@@ -16,9 +18,9 @@
   },
   "devDependencies": {
     "@types/node": "24.10.1",
-    "@types/nodemailer": "^7.0.4",
     "@types/react": "19.2.7",
     "autoprefixer": "10.4.16",
+    "baseline-browser-mapping": "^2.9.4",
     "eslint": "8.57.0",
     "eslint-config-next": "14.2.5",
     "postcss": "8.4.32",

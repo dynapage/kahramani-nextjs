@@ -19,6 +19,9 @@ export function SiteHeader({ lang }: HeaderProps) {
   const dict: Dictionary = getDictionary(resolvedLang);
   const currentLang = dict.lang;
   const otherLang = currentLang === "ar" ? "en" : "ar";
+  
+  // Check if we're on the home page
+  const isHomePage = pathname === "/";
 
   const buildLink = (href: string) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -32,55 +35,76 @@ export function SiteHeader({ lang }: HeaderProps) {
     params.set("lang", otherLang);
     const query = params.toString();
 
-    // persist in cookie for layout (dir / lang on <html>)
+    // Persist in cookie for layout (dir / lang on <html>)
     document.cookie = `kahra_lang=${otherLang}; path=/; max-age=31536000`;
 
     router.push(query ? `${pathname}?${query}` : pathname);
   };
 
   return (
-    // Lighter header: white background with subtle border
-    <header className="border-b border-kahra_gold/20 bg-kahra_gold/20 backdrop-blur">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-2 py-2">
-        <Link href={buildLink("/")}> 
-          <div className="flex items-center gap-3">
-             <div className="Relative h-20 w-136 overflow-hidden">
-             
-               {/* <Image
+    <header className="border-b border-kahra_gold/20 bg-white/80 backdrop-blur-md sticky top-0 z-50">
+      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
+        <Link href={buildLink("/")} className="flex items-center gap-3">
+          {!isHomePage && (
+            <div className="relative h-10 w-32">
+              <Image
                 src="/images/kahramani-logo.svg"
                 alt="Kahramani logo"
                 fill
-                className="object-contain p-1.5"
+                className="object-contain"
                 priority
-              /> */}
+              />
             </div>
-          </div>
+          )}
         </Link>
 
-        <nav className="hidden items-center gap-6 text-xs font-medium md:flex">
-          <Link href={buildLink("/")} className="text-gray-800 hover:text-kahra_gold">
+        <nav className="hidden items-center gap-6 text-sm font-medium md:flex">
+          <Link 
+            href={buildLink("/")} 
+            className="text-gray-700 hover:text-kahra_gold transition-colors"
+          >
             {dict.nav.home}
           </Link>
-          <Link href={buildLink("/catalog")} className="text-gray-800 hover:text-kahra_gold">
+          <Link 
+            href={buildLink("/catalog")} 
+            className="text-gray-700 hover:text-kahra_gold transition-colors"
+          >
             {dict.nav.catalog}
           </Link>
-          <Link href={buildLink("/about")} className="text-gray-800 hover:text-kahra_gold">
+          <Link 
+            href={buildLink("/about")} 
+            className="text-gray-700 hover:text-kahra_gold transition-colors"
+          >
             {dict.nav.about}
           </Link>
-          <Link href={buildLink("/contact")} className="text-gray-800 hover:text-kahra_gold">
+          <Link 
+            href={buildLink("/contact")} 
+            className="text-gray-700 hover:text-kahra_gold transition-colors"
+          >
             {dict.nav.contact}
           </Link>
 
-          <div className="mx-2 h-5 w-px bg-kahra_gold/20" />
+          <div className="mx-2 h-5 w-px bg-kahra_gold/30" />
 
           <button
             type="button"
             onClick={handleLanguageToggle}
-            className="rounded-full border border-kahra_gold px-4 py-1.5 text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-kahra_gold hover:bg-kahra_deep/20"
+            className="rounded-full border border-kahra_gold/60 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-kahra_gold hover:bg-kahra_gold hover:text-white transition-all"
           >
             {dict.nav.languageShort}
           </button>
         </nav>
+
+        {/* Mobile menu - simplified for now */}
+        <div className="md:hidden">
+          <button
+            type="button"
+            onClick={handleLanguageToggle}
+            className="rounded-full border border-kahra_gold/60 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-kahra_gold"
+          >
+            {dict.nav.languageShort}
+          </button>
+        </div>
       </div>
     </header>
   );

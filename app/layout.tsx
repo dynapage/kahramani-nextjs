@@ -1,7 +1,6 @@
 import "./globals.css";
 import type { Metadata } from "next";
 import type React from "react";
-import { cookies } from "next/headers";
 
 export const metadata: Metadata = {
   title: {
@@ -24,34 +23,24 @@ export const metadata: Metadata = {
     "Oman amber shop",
     "Muscat amber",
   ],
-  metadataBase: new URL("https://kahramani.com"),
   openGraph: {
     title: "كهرماني Kahramani | Baltic Amber Jewellery",
     description:
       "Authentic Baltic amber jewellery with a Middle Eastern soul. Shop rings, necklaces and sets from Oman to the GCC.",
     type: "website",
-    url: "https://kahramani.com",
   },
 };
 
-export const dynamic = "force-dynamic";
-
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const cookieStore = await cookies();
-  const cookieLang =
-    cookieStore.get("kahra_lang")?.value === "en" ? "en" : "ar";
-  const dir = cookieLang === "ar" ? "rtl" : "ltr";
-
   return (
-    <html lang={cookieLang} dir={dir}>
-      <body className="min-h-screen bg-kahra_deep text-kahra_cream antialiased">
+    <html lang="ar" dir="rtl">
+      <body className="min-h-screen bg-white text-gray-800 antialiased">
         {children}
       </body>
     </html>
   );
 }
-
