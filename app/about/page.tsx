@@ -1,7 +1,7 @@
 import { SiteHeader } from "../../components/SiteHeader";
 import { SiteFooter } from "../../components/SiteFooter";
 import { getDictionary } from "../../lib/dictionary";
-
+import { Suspense } from "react";
 interface AboutProps {
   searchParams?: { lang?: string };
 }
@@ -12,7 +12,12 @@ export default function AboutPage({ searchParams }: AboutProps) {
 
   return (
     <main className="flex min-h-screen flex-col bg-gradient-to-b from-white to-kahra_cream/10">
-      <SiteHeader lang={lang} />
+
+
+
+<Suspense fallback={null}>
+        <SiteHeader lang={lang} />
+      </Suspense>
 
       <section className="mx-auto max-w-4xl px-4 py-12 md:py-16">
         <h1 className="text-3xl font-bold text-gray-800">

@@ -2,6 +2,9 @@ import Image from "next/image";
 import { SiteHeader } from "../components/SiteHeader";
 import { SiteFooter } from "../components/SiteFooter";
 import { getDictionary } from "../lib/dictionary";
+import { Suspense } from "react";
+
+
 import {
   categories,
   getBestSellers,
@@ -28,23 +31,23 @@ export default function Home({ searchParams }: HomeProps) {
   };
 
   return (
-    <main className="flex min-h-screen flex-col bg-gradient-to-b from-white via-kahra_cream/5 to-white">
+    <main className="flex min-h-screen flex-col bg-gradient-to-b from-kahra_gold/20 via-kahra_cream/5 to-white">
       {/* HERO – Enhanced with animations */}
       <section className="relative overflow-hidden bg-gradient-to-br from-white via-kahra_cream/20 to-white border-b border-kahra_gold/10">
         {/* Crossfading background images */}
         <div className="absolute inset-0 opacity-40">
-          <div className="absolute inset-0 animate-hero-fade-1">
+          <div className="absolute inset-0 animate-hero-fade-2">
             <Image
-              src="/images/banner4.png"
+              src="/images/banner2.png"
               alt="Amber bracelet product shot"
               fill
               priority
               className="object-cover"
             />
           </div>
-          <div className="absolute inset-0 animate-hero-fade-2">
+          <div className="absolute inset-0 animate-hero-fade-1">
             <Image
-              src="/images/banner3.png"
+              src="/images/banner1.png"
               alt="Amber bracelet on marble surface"
               fill
               priority
@@ -58,13 +61,13 @@ export default function Home({ searchParams }: HomeProps) {
           <div className="absolute top-20 left-[10%] w-3 h-3 bg-kahra_gold/30 rounded-full animate-amber-float-1 blur-sm" />
           <div className="absolute top-40 right-[15%] w-2 h-2 bg-kahra_goldSoft/40 rounded-full animate-amber-float-2 blur-sm" />
           <div className="absolute bottom-32 left-[20%] w-4 h-4 bg-kahra_gold/20 rounded-full animate-amber-float-3 blur-sm" />
-          <div className="absolute top-60 right-[30%] w-2.5 h-2.5 bg-kahra_cream/50 rounded-full animate-amber-float-1" 
-               style={{ animationDelay: '2s' }} />
+          <div className="absolute top-60 right-[30%] w-2.5 h-2.5 bg-kahra_cream/50 rounded-full animate-amber-float-1"
+            style={{ animationDelay: '2s' }} />
         </div>
 
         {/* Logo section with elegant entrance */}
         <div className="relative z-10 flex items-center justify-center pt-12 pb-8">
-          <div className="relative h-32 w-64 animate-fade-in-down">
+          <div className="h-32 w-64 animate-fade-in-down">
             <Image
               src="/images/kahramani-logo.svg"
               alt="Kahramani logo"
@@ -77,16 +80,16 @@ export default function Home({ searchParams }: HomeProps) {
 
         {/* Hero text with staggered animation */}
         <div className="relative z-10 mx-auto max-w-4xl px-4 pb-16 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-800 animate-fade-in-up">
-            <span className="text-kahra_gold">{dict.hero.titleStrong}</span>
-            <span className="text-gray-700">{dict.hero.titleRest}</span>
+          <h1 className="text-1xl md:text-3xl font-bold text-gray-800 animate-fade-in-up">
+            {/* <span className="text-kahra_gold">{dict.hero.titleStrong}</span>
+            <span className="text-gray-700">{dict.hero.titleRest}</span> */}
           </h1>
-          <p className="mt-6 text-base md:text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed animate-fade-in-up"
+          {/* <p className="mt-6 text-base md:text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed animate-fade-in-up"
              style={{ animationDelay: '0.2s' }}>
             {dict.hero.subtitle}
-          </p>
+          </p> */}
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in-up"
-               style={{ animationDelay: '0.4s' }}>
+            style={{ animationDelay: '0.4s' }}>
             <a
               href={`/catalog?lang=${currentLang}`}
               className="rounded-full bg-kahra_gold px-8 py-3 text-sm font-semibold uppercase tracking-wider text-white shadow-lg hover:bg-kahra_gold/90 hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5"
@@ -103,7 +106,9 @@ export default function Home({ searchParams }: HomeProps) {
         </div>
       </section>
 
-      <SiteHeader lang={lang} />
+      <Suspense fallback={null}>
+        <SiteHeader lang={lang} />
+      </Suspense>
 
       {/* FEATURED SECTION */}
       <section

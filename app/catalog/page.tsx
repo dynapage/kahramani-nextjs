@@ -2,6 +2,8 @@ import Link from "next/link";
 import { SiteHeader } from "../../components/SiteHeader";
 import { SiteFooter } from "../../components/SiteFooter";
 import { getDictionary } from "../../lib/dictionary";
+import { Suspense } from "react";
+
 import {
   categories,
   getProductsByCategory,
@@ -28,7 +30,9 @@ export default async function CatalogPage({ searchParams }: CatalogProps) {
 
   return (
     <main className="flex min-h-screen flex-col bg-gradient-to-b from-white to-kahra_cream/10">
-      <SiteHeader lang={lang} />
+     <Suspense fallback={null}>
+        <SiteHeader lang={lang} />
+      </Suspense>
 
       <section className="mx-auto max-w-6xl px-4 py-10 md:py-14">
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">

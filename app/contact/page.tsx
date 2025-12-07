@@ -1,6 +1,7 @@
 import { SiteHeader } from "../../components/SiteHeader";
 import { SiteFooter } from "../../components/SiteFooter";
 import { getDictionary } from "../../lib/dictionary";
+import { Suspense } from "react";
 
 interface ContactProps {
   searchParams?: Promise<{ lang?: string }>;
@@ -14,7 +15,9 @@ export default async function ContactPage({ searchParams }: ContactProps) {
 
   return (
     <main className="flex min-h-screen flex-col bg-gradient-to-b from-white to-kahra_cream/10">
-      <SiteHeader lang={lang} />
+     <Suspense fallback={null}>
+        <SiteHeader lang={lang} />
+      </Suspense>
 
       <section className="mx-auto max-w-3xl px-4 py-12 md:py-16">
         <h1 className="text-3xl font-bold text-gray-800">

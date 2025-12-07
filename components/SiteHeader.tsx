@@ -42,7 +42,7 @@ export function SiteHeader({ lang }: HeaderProps) {
   };
 
   return (
-    <header className="border-b border-kahra_gold/20 bg-white/80 backdrop-blur-md sticky top-0 z-50">
+    <header className="border-b border-kahra_gold/20 bg-kahra_gold/10 backdrop-blur-md sticky top-0 z-50">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
         <Link href={buildLink("/")} className="flex items-center gap-3">
           {!isHomePage && (
