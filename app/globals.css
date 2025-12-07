@@ -28,7 +28,7 @@ body {
 }
 
 .animate-hero-fade-2 {
-  animation: hero-fade-2 12s ease-in-out infinite;
+  animation: hero-fade-2 3s ease-in-out infinite;
 }
 
 /* ELEGANT ENTRANCE ANIMATIONS */

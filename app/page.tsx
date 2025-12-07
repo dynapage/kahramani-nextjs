@@ -35,25 +35,17 @@ export default function Home({ searchParams }: HomeProps) {
       {/* HERO – Enhanced with animations */}
       <section className="relative overflow-hidden bg-gradient-to-br from-white via-kahra_cream/20 to-white border-b border-kahra_gold/10">
         {/* Crossfading background images */}
-        <div className="absolute inset-0 opacity-40">
-          <div className="absolute inset-0 animate-hero-fade-2">
+        <div className="absolute inset-0 opacity-80">
+          <div className="absolute inset-0 hero-fade-1">
             <Image
-              src="/images/banner2.png"
+              src="/images/gen4.gif"
               alt="Amber bracelet product shot"
               fill
               priority
               className="object-cover"
             />
           </div>
-          <div className="absolute inset-0 animate-hero-fade-1">
-            <Image
-              src="/images/banner1.png"
-              alt="Amber bracelet on marble surface"
-              fill
-              priority
-              className="object-cover"
-            />
-          </div>
+          
         </div>
 
         {/* Floating amber particles effect */}
