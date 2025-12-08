@@ -41,3 +41,4 @@ next-env.d.ts
 
 *storybook.log
 /src/app/[lang]/property/[id]
+.env*.local
