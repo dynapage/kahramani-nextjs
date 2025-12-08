@@ -4,7 +4,6 @@ import { SiteFooter } from "../components/SiteFooter";
 import { getDictionary } from "../lib/dictionary";
 import { Suspense } from "react";
 
-
 import {
   categories,
   getBestSellers,
@@ -13,11 +12,12 @@ import {
 } from "../data/products";
 
 interface HomeProps {
-  searchParams?: { lang?: string; category?: string };
+  searchParams?: Promise<{ lang?: string; category?: string }>;
 }
 
-export default function Home({ searchParams }: HomeProps) {
-  const lang = searchParams?.lang;
+export default async function Home({ searchParams }: HomeProps) {
+  const params = await searchParams;
+  const lang = params?.lang;
   const dict = getDictionary(lang);
   const currentLang = dict.lang;
   const bestSellers = getBestSellers();
@@ -45,7 +45,6 @@ export default function Home({ searchParams }: HomeProps) {
               className="object-cover"
             />
           </div>
-          
         </div>
 
         {/* Floating amber particles effect */}
