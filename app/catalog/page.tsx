@@ -27,6 +27,8 @@ export default async function CatalogPage({ searchParams }: CatalogProps) {
   const currentLang = dict.lang;
   const categoryParam = params?.category as string | undefined;
 
+//console.log("CatalogPage - categoryParam:", categoryParam);
+
   // Fetch products from API
   const apiProducts = await fetchProducts(1, 50, categoryParam);
 

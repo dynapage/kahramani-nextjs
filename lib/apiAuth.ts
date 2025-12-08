@@ -14,9 +14,14 @@ let cachedToken: CachedToken | null = null;
 
 export async function getAccessToken(): Promise<string> {
     // Check if we have a valid cached token
+
+
+
     if (cachedToken && cachedToken.expiresAt > Date.now()) {
         return cachedToken.token;
     }
+
+    console.log("**** No valid cached token, fetching a new 0000.");
 
     const tenantId = process.env.AZURE_TENANT_ID!;
     const clientId = process.env.AZURE_CLIENT_ID!;
@@ -41,6 +46,8 @@ export async function getAccessToken(): Promise<string> {
             body: params.toString(),
         });
 
+
+
         if (!response.ok) {
             throw new Error(`Failed to get access token: ${response.statusText}`);
         }
@@ -52,7 +59,7 @@ export async function getAccessToken(): Promise<string> {
             token: data.access_token,
             expiresAt: Date.now() + (data.expires_in - 300) * 1000,
         };
-
+        //console.log("Fetching new access response", data.access_token);
         return data.access_token;
     } catch (error) {
         console.error("Error getting access token:", error);
