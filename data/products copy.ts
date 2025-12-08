@@ -50,7 +50,7 @@ export const products: Product[] = [
     images: ["/images/RIN001.png"],
   },
   {
-    id: "cylinder-necklace",
+    id: "cylinder-necklace1",
     slug: "cylinder-necklace",
     category: "necklaces",
     name: {
@@ -69,7 +69,7 @@ export const products: Product[] = [
   },
 
   {
-    id: "cylinder-necklace",
+    id: "cylinder-necklace2",
     slug: "cylinder-necklace",
     category: "necklaces",
     name: {
@@ -88,7 +88,7 @@ export const products: Product[] = [
   },
 
     {
-    id: "cylinder-necklace",
+    id: "cylinder-necklace3",
     slug: "cylinder-necklace",
     category: "necklaces",
     name: {
@@ -106,7 +106,7 @@ export const products: Product[] = [
     images: ["/images/PEN02.png"],
   },
     {
-    id: "cylinder-necklace",
+    id: "cylinder-necklace4",
     slug: "cylinder-necklace",
     category: "necklaces",
     name: {
@@ -125,7 +125,7 @@ export const products: Product[] = [
   },
 
       {
-    id: "cylinder-necklace",
+    id: "cylinder-necklace5",
     slug: "cylinder-necklace",
     category: "necklaces",
     name: {

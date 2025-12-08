@@ -3,16 +3,22 @@ import { SiteHeader } from "../../components/SiteHeader";
 import { SiteFooter } from "../../components/SiteFooter";
 import { getDictionary } from "../../lib/dictionary";
 import { Suspense } from "react";
-
-import {
-  categories,
-  getProductsByCategory,
-} from "../../data/products";
-import { ProductGallery } from "../../components/ProductGallery";
+import { fetchProducts } from "../../lib/apiProducts";
+import { ProductCard } from "../../components/ProductCard";
 
 interface CatalogProps {
   searchParams?: Promise<{ lang?: string; category?: string }>;
 }
+
+// Category mapping for display
+const categories = [
+  { slug: "rings", ar: "خواتم", en: "Rings" },
+  { slug: "bracelets", ar: "أساور", en: "Bracelets" },
+  { slug: "earrings", ar: "أقراط", en: "Earrings" },
+  { slug: "pendants", ar: "قلائد", en: "Pendants" },
+  { slug: "necklaces", ar: "قلائد", en: "Necklaces" },
+  { slug: "sets", ar: "أطقم عنبر", en: "Sets (Rosery)" },
+];
 
 export default async function CatalogPage({ searchParams }: CatalogProps) {
   const params = await searchParams;
@@ -20,17 +26,13 @@ export default async function CatalogPage({ searchParams }: CatalogProps) {
   const dict = getDictionary(lang);
   const currentLang = dict.lang;
   const categoryParam = params?.category as string | undefined;
-  const products = getProductsByCategory(categoryParam);
 
-  const formatPrice = (usd: number, omr: number) => {
-    return currentLang === "ar"
-      ? `${omr.toFixed(3)} ر.ع · ${usd.toFixed(0)} USD`
-      : `${usd.toFixed(0)} USD · ${omr.toFixed(3)} OMR`;
-  };
+  // Fetch products from API
+  const apiProducts = await fetchProducts(1, 50, categoryParam);
 
   return (
     <main className="flex min-h-screen flex-col bg-gradient-to-b from-white to-kahra_cream/10">
-     <Suspense fallback={null}>
+      <Suspense fallback={null}>
         <SiteHeader lang={lang} />
       </Suspense>
 
@@ -45,7 +47,7 @@ export default async function CatalogPage({ searchParams }: CatalogProps) {
             </p>
           </div>
 
-          {/* CATEGORY FILTER - Fixed */}
+          {/* CATEGORY FILTER */}
           <div className="flex flex-wrap items-center gap-3 text-xs">
             <span className="font-semibold text-gray-700">
               {dict.catalog.filterByCategory}:
@@ -76,30 +78,27 @@ export default async function CatalogPage({ searchParams }: CatalogProps) {
           </div>
         </div>
 
-        <div className="mt-8 grid gap-6 md:grid-cols-3">
-          {products.map((p) => (
-            <article
-              key={p.id}
-              className="group flex flex-col overflow-hidden rounded-3xl bg-white border border-gray-200 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
-            >
-              <ProductGallery images={p.images} alt={p.name[currentLang]} />
-              <div className="px-5 py-4">
-                <h2 className="text-base font-semibold text-gray-800">
-                  {p.name[currentLang]}
-                </h2>
-                <p className="mt-2 text-sm text-gray-600 leading-relaxed">
-                  {p.shortDescription[currentLang]}
-                </p>
-                <p className="mt-3 text-sm font-semibold text-kahra_gold">
-                  {dict.catalog.from} {formatPrice(p.priceUsd, p.priceOmr)}
-                </p>
-                <p className="mt-1 text-xs text-gray-500">
-                  {p.inStock ? dict.catalog.inStock : dict.catalog.outOfStock}
-                </p>
-              </div>
-            </article>
-          ))}
-        </div>
+        {/* PRODUCT GRID */}
+        {apiProducts.length === 0 ? (
+          <div className="mt-12 text-center">
+            <p className="text-gray-600">
+              {currentLang === "ar" 
+                ? "لا توجد منتجات متاحة حالياً"
+                : "No products available at the moment"}
+            </p>
+          </div>
+        ) : (
+          <div className="mt-8 grid gap-6 md:grid-cols-3">
+            {apiProducts.map((product) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                currentLang={currentLang}
+                dict={dict}
+              />
+            ))}
+          </div>
+        )}
       </section>
 
       <SiteFooter />
