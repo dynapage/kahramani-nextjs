@@ -26,6 +26,7 @@ export function ProductCard({ product, currentLang, dict }: ProductCardProps) {
           signal: controller.signal,
           headers: {
             'Accept': 'application/json',
+            "X-Dev-Auth": "admin:testuser",
           },
         });
         
