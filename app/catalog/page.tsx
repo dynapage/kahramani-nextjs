@@ -76,7 +76,6 @@ export default async function CatalogPage({ searchParams }: CatalogProps) {
           </div>
         </div>
 
-        {/* PRODUCT GRID */}
         <div className="mt-8 grid gap-6 md:grid-cols-3">
           {products.map((p) => (
             <article

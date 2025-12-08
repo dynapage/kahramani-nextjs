@@ -2,20 +2,19 @@ import { SiteHeader } from "../../components/SiteHeader";
 import { SiteFooter } from "../../components/SiteFooter";
 import { getDictionary } from "../../lib/dictionary";
 import { Suspense } from "react";
+
 interface AboutProps {
-  searchParams?: { lang?: string };
+  searchParams?: Promise<{ lang?: string }>;
 }
 
-export default function AboutPage({ searchParams }: AboutProps) {
-  const lang = searchParams?.lang;
+export default async function AboutPage({ searchParams }: AboutProps) {
+  const params = await searchParams;
+  const lang = params?.lang;
   const dict = getDictionary(lang);
 
   return (
     <main className="flex min-h-screen flex-col bg-gradient-to-b from-white to-kahra_cream/10">
-
-
-
-<Suspense fallback={null}>
+      <Suspense fallback={null}>
         <SiteHeader lang={lang} />
       </Suspense>
 

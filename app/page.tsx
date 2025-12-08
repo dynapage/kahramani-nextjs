@@ -4,7 +4,6 @@ import { SiteFooter } from "../components/SiteFooter";
 import { getDictionary } from "../lib/dictionary";
 import { Suspense } from "react";
 
-
 import {
   categories,
   getBestSellers,
@@ -13,11 +12,12 @@ import {
 } from "../data/products";
 
 interface HomeProps {
-  searchParams?: { lang?: string; category?: string };
+  searchParams?: Promise<{ lang?: string; category?: string }>;
 }
 
-export default function Home({ searchParams }: HomeProps) {
-  const lang = searchParams?.lang;
+export default async function Home({ searchParams }: HomeProps) {
+  const params = await searchParams;
+  const lang = params?.lang;
   const dict = getDictionary(lang);
   const currentLang = dict.lang;
   const bestSellers = getBestSellers();
@@ -45,10 +45,9 @@ export default function Home({ searchParams }: HomeProps) {
               className="object-cover"
             />
           </div>
-          
         </div>
 
-        {/* Floating amber particles effect */}
+   
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-20 left-[10%] w-3 h-3 bg-kahra_gold/30 rounded-full animate-amber-float-1 blur-sm" />
           <div className="absolute top-40 right-[15%] w-2 h-2 bg-kahra_goldSoft/40 rounded-full animate-amber-float-2 blur-sm" />
@@ -115,8 +114,6 @@ export default function Home({ searchParams }: HomeProps) {
             {dict.featured.viewAll} →
           </a>
         </div>
-
-        {/* BEST SELLERS */}
         <section id="best-sellers" className="mt-8">
           <div className="grid gap-6 md:grid-cols-3">
             {bestSellers.map((p, idx) => (
@@ -148,8 +145,6 @@ export default function Home({ searchParams }: HomeProps) {
             ))}
           </div>
         </section>
-
-        {/* OFFERS */}
         {offers.length > 0 && (
           <section className="mt-12">
             <h3 className="text-lg font-semibold uppercase tracking-wider text-kahra_gold mb-6">
