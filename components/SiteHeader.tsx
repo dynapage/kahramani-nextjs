@@ -4,15 +4,21 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { getDictionary, type Dictionary } from "../lib/dictionary";
+import { Suspense, useEffect, useState } from "react";
 
 interface HeaderProps {
   lang?: string;
 }
 
-export function SiteHeader({ lang }: HeaderProps) {
+function HeaderContent({ lang }: HeaderProps) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const urlLang = searchParams.get("lang");
   const resolvedLang = urlLang === "en" || lang === "en" ? "en" : "ar";
@@ -20,10 +26,10 @@ export function SiteHeader({ lang }: HeaderProps) {
   const currentLang = dict.lang;
   const otherLang = currentLang === "ar" ? "en" : "ar";
   
-  // Check if we're on the home page
   const isHomePage = pathname === "/";
 
   const buildLink = (href: string) => {
+    if (!mounted) return href;
     const params = new URLSearchParams(searchParams.toString());
     params.set("lang", currentLang);
     const query = params.toString();
@@ -31,15 +37,40 @@ export function SiteHeader({ lang }: HeaderProps) {
   };
 
   const handleLanguageToggle = () => {
+    if (!mounted) return;
+    
     const params = new URLSearchParams(searchParams.toString());
     params.set("lang", otherLang);
     const query = params.toString();
 
-    // Persist in cookie for layout (dir / lang on <html>)
-    document.cookie = `kahra_lang=${otherLang}; path=/; max-age=31536000`;
+    document.cookie = `kahra_lang=${otherLang}; path=/; max-age=31536000; SameSite=Lax`;
 
     router.push(query ? `${pathname}?${query}` : pathname);
   };
+
+  if (!mounted) {
+    // Return a simplified header during SSR to prevent hydration mismatch
+    return (
+      <header className="border-b border-kahra_gold/20 bg-kahra_gold/10 backdrop-blur-md sticky top-0 z-50">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
+          <div className="flex items-center gap-3">
+            {!isHomePage && (
+              <div className="relative h-10 w-32">
+                <Image
+                  src="/images/kahramani-logo.svg"
+                  alt="Kahramani logo"
+                  fill
+                  className="object-contain"
+                  priority
+                />
+              </div>
+            )}
+          </div>
+          <div className="h-8 w-16 bg-kahra_gold/10 rounded-full animate-pulse" />
+        </div>
+      </header>
+    );
+  }
 
   return (
     <header className="border-b border-kahra_gold/20 bg-kahra_gold/10 backdrop-blur-md sticky top-0 z-50">
@@ -95,7 +126,6 @@ export function SiteHeader({ lang }: HeaderProps) {
           </button>
         </nav>
 
-        {/* Mobile menu - simplified for now */}
         <div className="md:hidden">
           <button
             type="button"
@@ -107,5 +137,20 @@ export function SiteHeader({ lang }: HeaderProps) {
         </div>
       </div>
     </header>
+  );
+}
+
+export function SiteHeader({ lang }: HeaderProps) {
+  return (
+    <Suspense fallback={
+      <header className="border-b border-kahra_gold/20 bg-kahra_gold/10 backdrop-blur-md sticky top-0 z-50">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
+          <div className="h-10 w-32 bg-kahra_gold/10 rounded animate-pulse" />
+          <div className="h-8 w-16 bg-kahra_gold/10 rounded-full animate-pulse" />
+        </div>
+      </header>
+    }>
+      <HeaderContent lang={lang} />
+    </Suspense>
   );
 }

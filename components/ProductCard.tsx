@@ -12,31 +12,55 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, currentLang, dict }: ProductCardProps) {
-  const [images, setImages] = useState<string[]>([]);
+  const [images, setImages] = useState<string[]>(["/images/placeholder.png"]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
   useEffect(() => {
-    // Lazy load images after component mounts
+    let isMounted = true;
+    const controller = new AbortController();
+
     const loadImages = async () => {
       try {
-        const response = await fetch(`/api/product-images/${product.id}`);
+        const response = await fetch(`/api/products/${product.id}/images?includeContent=true`, {
+          signal: controller.signal,
+          headers: {
+            'Accept': 'application/json',
+          },
+        });
+        
+        if (!isMounted) return;
+
         if (response.ok) {
           const data = await response.json();
-          setImages(data.images || ["/images/placeholder.png"]);
+          if (isMounted && data.images && Array.isArray(data.images)) {
+            setImages(data.images.length > 0 ? data.images : ["/images/placeholder.png"]);
+          }
         } else {
-          setImages(["/images/placeholder.png"]);
+          if (isMounted) {
+            setImageError(true);
+            setImages(["/images/placeholder.png"]);
+          }
         }
       } catch (err) {
-        console.error("Error loading product images:", err);
-        setImages(["/images/placeholder.png"]);
-        setError(true);
+        if (isMounted && err instanceof Error && err.name !== 'AbortError') {
+          console.error("Error loading product images:", err);
+          setImageError(true);
+          setImages(["/images/placeholder.png"]);
+        }
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
     loadImages();
+
+    return () => {
+      isMounted = false;
+      controller.abort();
+    };
   }, [product.id]);
 
   const formatPrice = (price: number) => {
@@ -60,6 +84,13 @@ export function ProductCard({ product, currentLang, dict }: ProductCardProps) {
             fill
             className="object-cover group-hover:scale-110 transition-transform duration-500"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 33vw"
+            loading="lazy"
+            onError={() => {
+              if (!imageError) {
+                setImageError(true);
+                setImages(["/images/placeholder.png"]);
+              }
+            }}
           />
         )}
         

@@ -99,7 +99,7 @@ export const dictionaries: Record<Lang, Dictionary> = {
       price: "السعر",
       inStock: "متوفر",
       outOfStock: "غير متوفر",
-      from: "ابتداءً من",
+      from: "السعر",
     },
     about: {
       title: "عن كهرماني",
