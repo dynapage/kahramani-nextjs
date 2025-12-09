@@ -41,7 +41,7 @@ export async function fetchProducts(
         const token = await getAccessToken();
 
         let url = `${API_BASE_URL}/products?page=${page}&pageSize=${pageSize}`;
-
+console.log(`Fetching images for token ${token} from API`);
 
       //  console.log("Fetching products from API:", url);
         // Add accessoryType filter if provided
@@ -82,10 +82,13 @@ export async function fetchProductImages(productId: string): Promise<string[]> {
         const response = await fetch(`${API_BASE_URL}/products/${productId}/images?includeContent=true`, {
             headers: {
                 Authorization: `Bearer ${token}`,
+                "X-Dev-Auth": "admin:testuser",
                 "Content-Type": "application/json",
             },
             next: { revalidate: 3600 }, // Cache for 1 hour
         });
+
+        
 
         if (!response.ok) {
             console.error(`API Error fetching images: ${response.status}`);
