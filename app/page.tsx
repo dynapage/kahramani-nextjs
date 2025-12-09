@@ -137,9 +137,9 @@ export default async function Home({ searchParams }: HomeProps) {
                   <p className="mt-2 text-sm text-gray-600 leading-relaxed">
                     {p.shortDescription[currentLang]}
                   </p>
-                  <p className="mt-3 text-sm font-bold text-kahra_gold">
+                  {/* <p className="mt-3 text-sm font-bold text-kahra_gold">
                     {formatPrice(p.priceUsd, p.priceOmr)}
-                  </p>
+                  </p> */}
                 </div>
               </article>
             ))}

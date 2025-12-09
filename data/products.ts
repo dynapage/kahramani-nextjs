@@ -47,7 +47,7 @@ export const products: Product[] = [
     priceOmr: 100,
     inStock: true,
     isBestSeller: true,
-    images: ["/images/ROS01.png"],
+    images: ["/images/Pro1_1.jpg", "/images/Pro1_2.jpg", "/images/Pro1_3.jpg", "/images/Pro1_4.png", "/images/Pro1_5.png", "/images/Pro1_6.png"],
   },
   {
     id: "cylinder-necklace1",
