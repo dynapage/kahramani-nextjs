@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Image from "next/image";
 import type { ApiProduct } from "../lib/apiProducts";
 import type { Dictionary } from "../lib/dictionary";
@@ -12,13 +12,19 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, currentLang, dict }: ProductCardProps) {
-  // Start with placeholder - show product details immediately
   const [images, setImages] = useState<string[]>(["/images/placeholder.png"]);
   const [loadingImages, setLoadingImages] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [imageError, setImageError] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
+    
     let isMounted = true;
     const controller = new AbortController();
 
@@ -42,16 +48,8 @@ export function ProductCard({ product, currentLang, dict }: ProductCardProps) {
             const allImages = data.images.filter((img: string) => img && img.length > 0);
             
             if (allImages.length > 0) {
-              setImages([allImages[0]]);
+              setImages(allImages);
               setCurrentImageIndex(0);
-              
-              allImages.slice(1).forEach((img: string, idx: number) => {
-                setTimeout(() => {
-                  if (isMounted) {
-                    setImages(prev => [...prev, img]);
-                  }
-                }, (idx + 1) * 300);
-              });
             } else {
               setImages(["/images/placeholder.png"]);
             }
@@ -85,9 +83,8 @@ export function ProductCard({ product, currentLang, dict }: ProductCardProps) {
       clearTimeout(timer);
       controller.abort();
     };
-  }, [product.id, product.name]);
+  }, [product.id, mounted]);
 
-  // Get the appropriate title and description based on language
   const productTitle = currentLang === "en" 
     ? (product.titleEn || product.name) 
     : product.name;
@@ -99,87 +96,105 @@ export function ProductCard({ product, currentLang, dict }: ProductCardProps) {
   const isPlaceholder = images.length === 1 && images[0] === "/images/placeholder.png";
   const hasMultipleImages = images.length > 1 && !isPlaceholder;
 
+  const handlePrevImage = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setCurrentImageIndex(prev => prev === 0 ? images.length - 1 : prev - 1);
+  }, [images.length]);
+
+  const handleNextImage = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setCurrentImageIndex(prev => prev === images.length - 1 ? 0 : prev + 1);
+  }, [images.length]);
+
+  const handleImageError = useCallback(() => {
+    if (!imageError && !isPlaceholder) {
+      setImageError(true);
+      setImages(["/images/placeholder.png"]);
+    }
+  }, [imageError, isPlaceholder]);
+
+  // Determine image source
+  const currentImage = images[currentImageIndex] || images[0];
+  const isBase64Image = currentImage?.startsWith('data:');
+
   return (
-    <article className="group flex flex-col overflow-hidden rounded-3xl bg-white border border-gray-200 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-      {/* Image Section */}
-      <div className="relative h-64 w-full overflow-hidden bg-gray-100">
-        {loadingImages && isPlaceholder ? (
+    <article className="group flex flex-col overflow-hidden rounded-2xl bg-white border border-gray-200 shadow-sm hover:shadow-lg transition-shadow duration-300">
+      {/* Image Section - Fixed aspect ratio for mobile */}
+      <div className="relative aspect-square w-full overflow-hidden bg-gray-100">
+        {!mounted || (loadingImages && isPlaceholder) ? (
           <div className="flex items-center justify-center h-full">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-kahra_gold"></div>
+            <div className="w-10 h-10 border-2 border-kahra_gold border-t-transparent rounded-full animate-spin" />
           </div>
         ) : (
           <>
             <Image
-              src={images[currentImageIndex] || images[0]}
+              src={currentImage}
               alt={productTitle}
               fill
-              className="object-cover group-hover:scale-110 transition-transform duration-500"
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 33vw"
+              className="object-cover transition-transform duration-500 group-hover:scale-105"
+              sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw"
               loading="lazy"
-              unoptimized={images[currentImageIndex]?.startsWith('data:') || false}
-              onError={() => {
-                if (!imageError && !isPlaceholder) {
-                  setImageError(true);
-                  setImages(["/images/placeholder.png"]);
-                }
-              }}
+              unoptimized={isBase64Image}
+              onError={handleImageError}
             />
             
             {loadingImages && !isPlaceholder && (
               <div className="absolute inset-0 bg-white/50 flex items-center justify-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-kahra_gold"></div>
+                <div className="w-8 h-8 border-2 border-kahra_gold border-t-transparent rounded-full animate-spin" />
               </div>
             )}
           </>
         )}
         
-        {hasMultipleImages && !loadingImages && (
+        {/* Image counter badge */}
+        {hasMultipleImages && !loadingImages && mounted && (
           <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded-full">
-            {currentImageIndex + 1} / {images.length} {currentLang === "ar" ? "صور" : "images"}
+            {currentImageIndex + 1} / {images.length}
           </div>
         )}
         
-        {hasMultipleImages && !loadingImages && (
+        {/* Navigation buttons */}
+        {hasMultipleImages && !loadingImages && mounted && (
           <>
             <button
-              onClick={(e) => {
-                e.preventDefault();
-                setCurrentImageIndex(prev => prev === 0 ? images.length - 1 : prev - 1);
-              }}
-              className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-black/80 text-white rounded-full w-8 h-8 flex items-center justify-center transition-all"
+              type="button"
+              onClick={handlePrevImage}
+              className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full w-8 h-8 flex items-center justify-center transition-colors touch-manipulation"
+              aria-label="Previous image"
             >
-              ‹
+              <span className="text-lg leading-none">‹</span>
             </button>
             <button
-              onClick={(e) => {
-                e.preventDefault();
-                setCurrentImageIndex(prev => prev === images.length - 1 ? 0 : prev + 1);
-              }}
-              className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-black/80 text-white rounded-full w-8 h-8 flex items-center justify-center transition-all"
+              type="button"
+              onClick={handleNextImage}
+              className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full w-8 h-8 flex items-center justify-center transition-colors touch-manipulation"
+              aria-label="Next image"
             >
-              ›
+              <span className="text-lg leading-none">›</span>
             </button>
           </>
         )}
       </div>
 
-      {/* Product Info */}
-      <div className="px-5 py-4">
-        <h2 className="text-base font-semibold text-gray-800 line-clamp-2">
+      {/* Product Info - Better padding for mobile */}
+      <div className="flex flex-col flex-1 p-4">
+        <h2 className="text-sm sm:text-base font-semibold text-gray-800 line-clamp-2 leading-snug">
           {productTitle}
         </h2>
         
-        <p className="mt-2 text-sm text-gray-600 leading-relaxed line-clamp-3">
+        <p className="mt-2 text-xs sm:text-sm text-gray-600 leading-relaxed line-clamp-2 flex-1">
           {productDescription}
         </p>
         
-        <div className="mt-3 flex items-center justify-end">
-          {product.productCode && (
+        {product.productCode && (
+          <div className="mt-3 flex items-center justify-end">
             <span className="text-xs text-kahra_gold font-medium bg-kahra_gold/10 px-2 py-1 rounded-full">
               #{product.productCode}
             </span>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </article>
   );

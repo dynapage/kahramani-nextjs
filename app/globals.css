@@ -7,12 +7,46 @@
   --foreground: #0b2b27;
 }
 
+/* Safari-specific fixes */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
 body {
   background-color: var(--background);
   color: var(--foreground);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* HERO CROSSFADE ANIMATIONS */
+/* Prevent iOS zoom on input focus */
+@media screen and (max-width: 768px) {
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* Hide horizontal scrollbar but allow scrolling */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Touch optimization for Safari */
+button, a, [role="button"] {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.touch-manipulation {
+  touch-action: manipulation;
+}
+
+/* HERO CROSSFADE ANIMATIONS - Safari compatible */
 @keyframes hero-fade-1 {
   0%, 45% { opacity: 1; }
   55%, 100% { opacity: 0; }
@@ -24,21 +58,25 @@ body {
 }
 
 .animate-hero-fade-1 {
+  -webkit-animation: hero-fade-1 12s ease-in-out infinite;
   animation: hero-fade-1 12s ease-in-out infinite;
 }
 
 .animate-hero-fade-2 {
+  -webkit-animation: hero-fade-2 3s ease-in-out infinite;
   animation: hero-fade-2 3s ease-in-out infinite;
 }
 
-/* ELEGANT ENTRANCE ANIMATIONS */
+/* ELEGANT ENTRANCE ANIMATIONS - Safari compatible */
 @keyframes fade-in-down {
   0% {
     opacity: 0;
+    -webkit-transform: translateY(-20px);
     transform: translateY(-20px);
   }
   100% {
     opacity: 1;
+    -webkit-transform: translateY(0);
     transform: translateY(0);
   }
 }
@@ -46,79 +84,119 @@ body {
 @keyframes fade-in-up {
   0% {
     opacity: 0;
+    -webkit-transform: translateY(20px);
     transform: translateY(20px);
   }
   100% {
     opacity: 1;
+    -webkit-transform: translateY(0);
     transform: translateY(0);
   }
 }
 
 .animate-fade-in-down {
+  -webkit-animation: fade-in-down 1s ease-out;
   animation: fade-in-down 1s ease-out;
 }
 
 .animate-fade-in-up {
+  -webkit-animation: fade-in-up 1s ease-out backwards;
   animation: fade-in-up 1s ease-out backwards;
 }
 
-/* FLOATING AMBER PARTICLES */
+/* FLOATING AMBER PARTICLES - Safari compatible, NO BLUR on mobile */
 @keyframes amber-float-1 {
   0%, 100% { 
+    -webkit-transform: translateY(0) translateX(0);
     transform: translateY(0) translateX(0);
   }
   25% {
+    -webkit-transform: translateY(-10px) translateX(5px);
     transform: translateY(-10px) translateX(5px);
   }
   50% { 
+    -webkit-transform: translateY(-6px) translateX(-3px);
     transform: translateY(-6px) translateX(-3px);
   }
   75% {
+    -webkit-transform: translateY(-12px) translateX(2px);
     transform: translateY(-12px) translateX(2px);
   }
 }
 
 @keyframes amber-float-2 {
   0%, 100% { 
+    -webkit-transform: translateY(0) translateX(0) scale(1);
     transform: translateY(0) translateX(0) scale(1);
   }
   33% {
+    -webkit-transform: translateY(8px) translateX(-4px) scale(1.1);
     transform: translateY(8px) translateX(-4px) scale(1.1);
   }
   66% { 
+    -webkit-transform: translateY(4px) translateX(6px) scale(0.9);
     transform: translateY(4px) translateX(6px) scale(0.9);
   }
 }
 
 @keyframes amber-float-3 {
   0%, 100% { 
+    -webkit-transform: translateY(0) rotate(0deg);
     transform: translateY(0) rotate(0deg);
   }
   50% { 
+    -webkit-transform: translateY(-8px) rotate(180deg);
     transform: translateY(-8px) rotate(180deg);
   }
 }
 
 .animate-amber-float-1 {
+  -webkit-animation: amber-float-1 8s ease-in-out infinite;
   animation: amber-float-1 8s ease-in-out infinite;
 }
 
 .animate-amber-float-2 {
+  -webkit-animation: amber-float-2 10s ease-in-out infinite;
   animation: amber-float-2 10s ease-in-out infinite;
 }
 
 .animate-amber-float-3 {
+  -webkit-animation: amber-float-3 9s ease-in-out infinite;
   animation: amber-float-3 9s ease-in-out infinite;
 }
 
-/* SMOOTH TRANSITIONS */
+/* Spinner animation - Safari compatible */
+@keyframes spin {
+  from {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  to {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  -webkit-animation: spin 1s linear infinite;
+  animation: spin 1s linear infinite;
+}
+
+/* SMOOTH TRANSITIONS - with Safari prefixes */
 * {
+  -webkit-transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* GLASS MORPHISM EFFECT */
+/* GLASS MORPHISM EFFECT - Safari compatible */
 .backdrop-blur-md {
+  -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
+}
+
+.backdrop-blur-sm {
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
 }
 
 /* SOFT SHADOWS */
@@ -130,10 +208,80 @@ body {
   box-shadow: 0 10px 40px rgba(184, 135, 70, 0.15);
 }
 
-/* GRADIENT TEXT */
+/* GRADIENT TEXT - Safari compatible */
 .gradient-text {
   background: linear-gradient(135deg, #b88746 0%, #f9d423 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+}
+
+/* Image aspect ratio for older Safari */
+.aspect-square {
+  aspect-ratio: 1 / 1;
+}
+
+@supports not (aspect-ratio: 1 / 1) {
+  .aspect-square {
+    position: relative;
+    padding-bottom: 100%;
+  }
+  .aspect-square > * {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+}
+
+/* Line clamp for older Safari */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Safe area insets for notched iPhones */
+@supports (padding: env(safe-area-inset-bottom)) {
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* Fix for iOS sticky positioning */
+@supports (-webkit-touch-callout: none) {
+  .sticky {
+    position: -webkit-sticky;
+    position: sticky;
+  }
+}
+
+/* Prevent content jump on scroll */
+html {
+  overflow-y: scroll;
+}
+
+/* Better focus styles for accessibility */
+:focus-visible {
+  outline: 2px solid #b88746;
+  outline-offset: 2px;
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

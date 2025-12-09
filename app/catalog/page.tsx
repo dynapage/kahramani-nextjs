@@ -45,10 +45,11 @@ export default async function CatalogPage({ searchParams }: CatalogProps) {
         <SiteHeader lang={lang} />
       </Suspense>
 
-      <section className="mx-auto max-w-6xl px-4 py-10 md:py-14">
-        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+      <section className="mx-auto w-full max-w-6xl px-4 py-6 sm:py-10 md:py-14">
+        {/* Header Section */}
+        <div className="flex flex-col gap-4">
           <div>
-            <h1 className="text-3xl font-semibold text-gray-800">
+            <h1 className="text-2xl sm:text-3xl font-semibold text-gray-800">
               {dict.catalog.title}
             </h1>
             <p className="mt-2 text-sm text-gray-600">
@@ -63,49 +64,63 @@ export default async function CatalogPage({ searchParams }: CatalogProps) {
             )}
           </div>
 
-          {/* CATEGORY FILTER */}
-          <div className="flex flex-wrap items-center gap-3 text-xs">
-            <span className="font-semibold text-gray-700">
+          {/* CATEGORY FILTER - Horizontal scrollable on mobile */}
+          <div className="mt-2">
+            <span className="block text-xs font-semibold text-gray-700 mb-2">
               {dict.catalog.filterByCategory}:
             </span>
-            <Link
-              href={`/catalog?lang=${currentLang}`}
-              className={`rounded-full border px-3 py-1.5 transition-all ${
-                !categoryParam
-                  ? "border-kahra_gold bg-kahra_gold text-white shadow-md"
-                  : "border-gray-300 text-gray-600 hover:border-kahra_gold"
-              }`}
-            >
-              {dict.catalog.allCategories}
-            </Link>
-            {categories.map((cat) => (
+            <div className="flex overflow-x-auto pb-2 gap-2 -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap scrollbar-hide">
               <Link
-                key={cat.slug}
-                href={`/catalog?category=${cat.slug}&lang=${currentLang}`}
-                className={`rounded-full border px-3 py-1.5 transition-all ${
-                  categoryParam === cat.slug
+                href={`/catalog?lang=${currentLang}`}
+                className={`flex-shrink-0 rounded-full border px-3 py-1.5 text-xs transition-all whitespace-nowrap ${
+                  !categoryParam
                     ? "border-kahra_gold bg-kahra_gold text-white shadow-md"
-                    : "border-gray-300 text-gray-600 hover:border-kahra_gold"
+                    : "border-gray-300 text-gray-600 hover:border-kahra_gold bg-white"
                 }`}
               >
-                {currentLang === "ar" ? cat.ar : cat.en}
+                {dict.catalog.allCategories}
               </Link>
-            ))}
+              {categories.map((cat) => (
+                <Link
+                  key={cat.slug}
+                  href={`/catalog?category=${cat.slug}&lang=${currentLang}`}
+                  className={`flex-shrink-0 rounded-full border px-3 py-1.5 text-xs transition-all whitespace-nowrap ${
+                    categoryParam === cat.slug
+                      ? "border-kahra_gold bg-kahra_gold text-white shadow-md"
+                      : "border-gray-300 text-gray-600 hover:border-kahra_gold bg-white"
+                  }`}
+                >
+                  {currentLang === "ar" ? cat.ar : cat.en}
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
 
-        {/* PRODUCT GRID */}
+        {/* PRODUCT GRID - Responsive grid */}
         {apiProducts.length === 0 ? (
-          <div className="mt-12 text-center">
-            <p className="text-gray-600">
+          <div className="mt-12 text-center py-12">
+            <div className="text-gray-400 mb-4">
+              <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+              </svg>
+            </div>
+            <p className="text-gray-600 text-base">
               {currentLang === "ar" 
                 ? "لا توجد منتجات متاحة حالياً"
                 : "No products available at the moment"}
             </p>
+            <Link
+              href={`/catalog?lang=${currentLang}`}
+              className="inline-block mt-4 text-kahra_gold hover:underline text-sm"
+            >
+              {currentLang === "ar" ? "عرض جميع المنتجات" : "View all products"}
+            </Link>
           </div>
         ) : (
           <>
-            <div className="mt-8 grid gap-6 md:grid-cols-3">
+            {/* Grid: 1 col on mobile, 2 on sm, 3 on md+ */}
+            <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {apiProducts.map((product) => (
                 <ProductCard
                   key={product.id}
