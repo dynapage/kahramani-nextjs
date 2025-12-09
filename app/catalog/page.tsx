@@ -5,18 +5,18 @@ import { getDictionary } from "../../lib/dictionary";
 import { Suspense } from "react";
 import { fetchProducts } from "../../lib/apiProducts";
 import { ProductCard } from "../../components/ProductCard";
+import { Pagination } from "../../components/Pagination";
 
 interface CatalogProps {
-  searchParams?: Promise<{ lang?: string; category?: string }>;
+  searchParams?: Promise<{ lang?: string; category?: string; page?: string }>;
 }
 
-// Category mapping for display
+// Category mapping for display - Pendants and Necklaces combined
 const categories = [
   { slug: "rings", ar: "خواتم", en: "Rings" },
   { slug: "bracelets", ar: "أساور", en: "Bracelets" },
   { slug: "earrings", ar: "أقراط", en: "Earrings" },
-  { slug: "pendants", ar: "قلائد", en: "Pendants" },
-  { slug: "necklaces", ar: "قلائد", en: "Necklaces" },
+  { slug: "necklaces", ar: "قلائد", en: "Necklaces & Pendants" },
   { slug: "sets", ar: "أطقم عنبر", en: "Sets (Rosery)" },
 ];
 
@@ -26,11 +26,18 @@ export default async function CatalogPage({ searchParams }: CatalogProps) {
   const dict = getDictionary(lang);
   const currentLang = dict.lang;
   const categoryParam = params?.category as string | undefined;
+  const pageParam = params?.page;
+  const currentPage = pageParam ? parseInt(pageParam, 10) : 1;
 
-//console.log("CatalogPage - categoryParam:", categoryParam);
-
-  // Fetch products from API
-  const apiProducts = await fetchProducts(1, 50, categoryParam);
+  // Fetch products from API with pagination (12 per page)
+  const productsResponse = await fetchProducts(currentPage, 12, categoryParam);
+  const { 
+    items: apiProducts, 
+    totalCount, 
+    totalPages, 
+    hasNextPage, 
+    hasPreviousPage 
+  } = productsResponse;
 
   return (
     <main className="flex min-h-screen flex-col bg-gradient-to-b from-white to-kahra_cream/10">
@@ -47,6 +54,13 @@ export default async function CatalogPage({ searchParams }: CatalogProps) {
             <p className="mt-2 text-sm text-gray-600">
               {dict.featured.subtitle}
             </p>
+            {totalCount > 0 && (
+              <p className="mt-1 text-xs text-gray-500">
+                {currentLang === "ar" 
+                  ? `عرض ${apiProducts.length} من ${totalCount} منتج`
+                  : `Showing ${apiProducts.length} of ${totalCount} products`}
+              </p>
+            )}
           </div>
 
           {/* CATEGORY FILTER */}
@@ -90,16 +104,28 @@ export default async function CatalogPage({ searchParams }: CatalogProps) {
             </p>
           </div>
         ) : (
-          <div className="mt-8 grid gap-6 md:grid-cols-3">
-            {apiProducts.map((product) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                currentLang={currentLang}
-                dict={dict}
-              />
-            ))}
-          </div>
+          <>
+            <div className="mt-8 grid gap-6 md:grid-cols-3">
+              {apiProducts.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  currentLang={currentLang}
+                  dict={dict}
+                />
+              ))}
+            </div>
+
+            {/* PAGINATION */}
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              hasNextPage={hasNextPage}
+              hasPreviousPage={hasPreviousPage}
+              currentLang={currentLang}
+              category={categoryParam}
+            />
+          </>
         )}
       </section>
 

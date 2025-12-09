@@ -5,9 +5,23 @@ const API_BASE_URL = "https://apikahramani-e8eddtdchububue6.southindia-01.azurew
 export interface ApiProduct {
     id: string;
     name: string;
+    titleEn?: string;
     descriptionAr: string;
+    descriptionEn?: string;
+    productCode?: string;
     listPrice: number;
     accessoryType?: number;
+    quantityInStock?: number;
+}
+
+export interface ProductsResponse {
+    items: ApiProduct[];
+    page: number;
+    pageSize: number;
+    totalCount: number;
+    totalPages: number;
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
 }
 
 export interface ProductImage {
@@ -23,9 +37,8 @@ export type CategoryType =
     | "850000003" // Ring
     | "850000004"; // Rosery
 
-export const categoryMapping: Record<string, CategoryType> = {
-    pendants: "850000008",
-    necklaces: "850000000",
+export const categoryMapping: Record<string, CategoryType | CategoryType[]> = {
+    necklaces: ["850000008", "850000000"], // Combined: Pendants + Necklaces
     earrings: "850000001",
     bracelets: "850000002",
     rings: "850000003",
@@ -36,17 +49,21 @@ export async function fetchProducts(
     page: number = 1,
     pageSize: number = 12,
     accessoryType?: string
-): Promise<ApiProduct[]> {
+): Promise<ProductsResponse> {
     try {
         const token = await getAccessToken();
 
         let url = `${API_BASE_URL}/products?page=${page}&pageSize=${pageSize}`;
-console.log(`Fetching images for token ${token} from API`);
 
-      //  console.log("Fetching products from API:", url);
         // Add accessoryType filter if provided
         if (accessoryType && categoryMapping[accessoryType]) {
-            url += `&accessoryType=${categoryMapping[accessoryType]}`;
+            const mapping = categoryMapping[accessoryType];
+            if (Array.isArray(mapping)) {
+                // For combined categories (necklaces = pendants + necklaces)
+                url += `&accessoryType=${mapping.join(',')}`;
+            } else {
+                url += `&accessoryType=${mapping}`;
+            }
         }
 
         const response = await fetch(url, { 
@@ -58,20 +75,41 @@ console.log(`Fetching images for token ${token} from API`);
             next: { revalidate: 300 }, // Cache for 5 minutes
         });
 
-        
-
         if (!response.ok) {
             console.error(`API Error: ${response.status} ${response.statusText}`);
-            return [];
+            return {
+                items: [],
+                page: 1,
+                pageSize: 12,
+                totalCount: 0,
+                totalPages: 0,
+                hasNextPage: false,
+                hasPreviousPage: false
+            };
         }
 
         const data = await response.json();
 
-        //console.log("API data:", data.items);
-        return data.items || [];
+        return {
+            items: data.items || [],
+            page: data.page || 1,
+            pageSize: data.pageSize || 12,
+            totalCount: data.totalCount || 0,
+            totalPages: data.totalPages || 0,
+            hasNextPage: data.hasNextPage || false,
+            hasPreviousPage: data.hasPreviousPage || false
+        };
     } catch (error) {
         console.error("Error fetching products:", error);
-        return [];
+        return {
+            items: [],
+            page: 1,
+            pageSize: 12,
+            totalCount: 0,
+            totalPages: 0,
+            hasNextPage: false,
+            hasPreviousPage: false
+        };
     }
 }
 
@@ -88,22 +126,17 @@ export async function fetchProductImages(productId: string): Promise<string[]> {
             next: { revalidate: 3600 }, // Cache for 1 hour
         });
 
-        
-
         if (!response.ok) {
             console.error(`API Error fetching images: ${response.status}`);
-            return ["/images/placeholder.png"]; // Fallback image
+            return ["/images/placeholder.png"];
         }
 
         const data = await response.json();
 
-        // Extract image URLs from response
-        // Adjust this based on actual API response structure
         if (data.images && Array.isArray(data.images)) {
             return data.images.map((img: ProductImage) => img.imageUrl);
         }
 
-        // If no images, return placeholder
         return ["/images/placeholder.png"];
     } catch (error) {
         console.error(`Error fetching images for product ${productId}:`, error);
