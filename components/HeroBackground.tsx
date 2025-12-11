@@ -1,121 +1,130 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import Image from "next/image";
 
 /**
- * HeroBackground Component - Optimized for slow connections
+ * HeroBackground Component - Progressive Video Loading
  * 
- * Strategy for 2.7MB video:
- * 1. Show static poster image IMMEDIATELY (fast first paint)
- * 2. Load video in background ONLY on fast connections
- * 3. On slow connections or data saver mode: show only static image
- * 4. On mobile: always show static image (saves data + prevents crashes)
+ * Strategy:
+ * 1. Show poster image IMMEDIATELY (fast first paint)
+ * 2. Load video lazily on ALL devices (mobile + desktop)
+ * 3. Video plays AFTER image loads (progressive enhancement)
+ * 4. Compatible with iOS 13+ Safari (5+ years old)
  * 
- * Required files in /public:
- * - /images/hero-poster.jpg (compressed, ~50-100KB) - shown immediately
- * - /videos/hero.mp4 (2.7MB) - loaded lazily on desktop with fast connection
+ * Mobile Safari Requirements:
+ * - autoPlay only works with muted
+ * - playsInline prevents fullscreen
+ * - preload="metadata" for better performance
  */
-
-type ConnectionSpeed = 'slow' | 'fast' | 'unknown';
 
 export function HeroBackground() {
   const [mounted, setMounted] = useState(false);
-  const [isMobile, setIsMobile] = useState(true);
-  const [connectionSpeed, setConnectionSpeed] = useState<ConnectionSpeed>('unknown');
-  const [videoLoaded, setVideoLoaded] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
+  const [videoError, setVideoError] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const loadingTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     setMounted(true);
 
-    // Detect device type
-    const checkDevice = () => {
-      const userAgent = navigator.userAgent || '';
-      const isMobileDevice = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent.toLowerCase());
-      const isSmallScreen = window.innerWidth < 768;
-      const isIOS = /iPad|iPhone|iPod/.test(userAgent) || 
-        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-      
-      setIsMobile(isMobileDevice || isSmallScreen || isIOS);
-    };
-
-    // Detect connection speed
-    const checkConnection = () => {
-      const nav = navigator as Navigator & {
-        connection?: {
-          effectiveType?: string;
-          saveData?: boolean;
-          downlink?: number;
-        };
-      };
-
-      if (nav.connection) {
-        // User has data saver enabled - respect it
-        if (nav.connection.saveData) {
-          setConnectionSpeed('slow');
-          return;
-        }
-
-        // Check effective connection type
-        const effectiveType = nav.connection.effectiveType;
-        if (effectiveType === '4g' && (nav.connection.downlink ?? 0) >= 5) {
-          setConnectionSpeed('fast');
-        } else if (effectiveType === 'slow-2g' || effectiveType === '2g' || effectiveType === '3g') {
-          setConnectionSpeed('slow');
-        } else {
-          // Default to fast on desktop with unknown speed
-          setConnectionSpeed('fast');
-        }
-      } else {
-        // No Network Information API - assume fast on desktop
-        setConnectionSpeed('fast');
+    return () => {
+      if (loadingTimerRef.current) {
+        clearTimeout(loadingTimerRef.current);
       }
     };
-
-    checkDevice();
-    checkConnection();
-
-    window.addEventListener('resize', checkDevice);
-    
-    return () => window.removeEventListener('resize', checkDevice);
   }, []);
 
-  // Lazy load video only when conditions are met
+  // Progressive video loading - works on ALL devices
   useEffect(() => {
-    if (!mounted || isMobile || connectionSpeed === 'slow') {
+    if (!mounted || !videoRef.current) {
       return;
     }
 
-    // Only load video on desktop with fast connection
-    if (connectionSpeed === 'fast' && videoRef.current) {
-      const video = videoRef.current;
-      
-      // Use Intersection Observer to only load when visible
-      const observer = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting && !videoLoaded) {
-              // Start loading video
-              video.load();
-            }
-          });
-        },
-        { threshold: 0.1 }
-      );
+    const video = videoRef.current;
 
-      observer.observe(video);
+    // Use IntersectionObserver for lazy loading
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            // Video is in viewport - start loading
+            // Wait 500ms after poster loads for smooth transition
+            loadingTimerRef.current = setTimeout(() => {
+              try {
+                // Load video metadata first (not full video)
+                video.load();
+              } catch (err) {
+                console.warn('Video load failed:', err);
+                setVideoError(true);
+              }
+            }, 500);
+          }
+        });
+      },
+      { 
+        threshold: 0.1,
+        rootMargin: '50px' // Start loading slightly before visible
+      }
+    );
 
-      return () => observer.disconnect();
+    observer.observe(video);
+
+    return () => {
+      observer.disconnect();
+      if (loadingTimerRef.current) {
+        clearTimeout(loadingTimerRef.current);
+      }
+    };
+  }, [mounted]);
+
+  // Handle video ready to play
+  const handleVideoCanPlay = useCallback(() => {
+    // Video has enough data to play
+    // Fade it in smoothly
+    setShowVideo(true);
+    
+    // Ensure video starts playing (especially important for iOS)
+    if (videoRef.current) {
+      videoRef.current.play().catch((err) => {
+        // Autoplay was blocked - this is OK, video will be visible
+        console.warn('Autoplay blocked:', err);
+      });
     }
-  }, [mounted, isMobile, connectionSpeed, videoLoaded]);
+  }, []);
 
-  const handleVideoLoaded = () => {
-    setVideoLoaded(true);
-    // Small delay before showing video to ensure smooth transition
-    setTimeout(() => setShowVideo(true), 100);
-  };
+  // Handle video errors
+  const handleVideoError = useCallback(() => {
+    console.warn('Video failed to load - using poster fallback');
+    setVideoError(true);
+    setShowVideo(false);
+  }, []);
+
+  // Pause video when not visible (save battery/bandwidth)
+  useEffect(() => {
+    if (!mounted || !videoRef.current) return;
+
+    const video = videoRef.current;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            video.play().catch(() => {
+              // Ignore play errors
+            });
+          } else {
+            video.pause();
+          }
+        });
+      },
+      { threshold: 0.5 }
+    );
+
+    observer.observe(video);
+
+    return () => observer.disconnect();
+  }, [mounted]);
 
   // SSR / Not mounted - show poster immediately
   if (!mounted) {
@@ -134,30 +143,12 @@ export function HeroBackground() {
     );
   }
 
-  // Mobile or slow connection - show only static image
-  // if (isMobile || connectionSpeed === 'slow') {
-  //   return (
-  //     <div className="absolute inset-0">
-  //       <Image
-  //         src="/images/hero-poster.jpg"
-  //         alt="Kahramani amber jewelry"
-  //         fill
-  //         priority
-  //         className="object-cover"
-  //         sizes="100vw"
-  //         quality={75}
-  //       />
-  //     </div>
-  //   );
-  // }
-
-  // Desktop with fast connection - show video with poster fallback
   return (
     <div className="absolute inset-0">
-      {/* Poster image - always visible initially, fades out when video plays */}
+      {/* Poster Image - Always visible initially, fades out when video plays */}
       <div 
         className={`absolute inset-0 transition-opacity duration-1000 ${
-          showVideo ? 'opacity-0' : 'opacity-100'
+          showVideo && !videoError ? 'opacity-0' : 'opacity-100'
         }`}
       >
         <Image
@@ -171,24 +162,31 @@ export function HeroBackground() {
         />
       </div>
 
-      {/* Video - loads lazily, fades in when ready */}
-      <video
-        ref={videoRef}
-        autoPlay
-        loop
-        muted
-        playsInline
-        preload="none"
-        poster="/images/hero-poster.jpg"
-        onCanPlayThrough={handleVideoLoaded}
-        className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
-          showVideo ? 'opacity-80' : 'opacity-0'
-        }`}
-      >
-        {/* Provide multiple formats for better compatibility */}
-        <source src="/videos/hero.webm" type="video/webm" />
-        <source src="/videos/hero.mp4" type="video/mp4" />
-      </video>
+      {/* Video - Loads lazily, plays on ALL devices (mobile + desktop) */}
+      {!videoError && (
+        <video
+          ref={videoRef}
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="metadata"
+          poster="/images/hero-poster.jpg"
+          onCanPlay={handleVideoCanPlay}
+          onError={handleVideoError}
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
+            showVideo ? 'opacity-80' : 'opacity-0'
+          }`}
+          // iOS Safari compatibility attributes
+          webkit-playsinline="true"
+          x5-playsinline="true"
+          x-webkit-airplay="allow"
+        >
+          {/* MP4 first for best iOS compatibility */}
+          <source src="/videos/hero.mp4" type="video/mp4" />
+          <source src="/videos/hero.webm" type="video/webm" />
+        </video>
+      )}
     </div>
   );
 }

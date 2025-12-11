@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import Image from "next/image";
 import type { ApiProduct } from "../lib/apiProducts";
 import type { Dictionary } from "../lib/dictionary";
@@ -16,14 +16,22 @@ export function ProductCard({ product, currentLang, dict }: ProductCardProps) {
   const [loadingImages, setLoadingImages] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [imageError, setImageError] = useState(false);
-  const [mounted, setMounted] = useState(false);
+  
+  // ✅ FIX: Use useRef instead of useState for mounted flag
+  // This prevents infinite loops in Safari
+  const mountedRef = useRef(false);
 
+  // Set mounted flag without triggering re-render
   useEffect(() => {
-    setMounted(true);
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
   }, []);
 
+  // ✅ FIX: ONLY product.id in dependencies - NO mounted
   useEffect(() => {
-    if (!mounted) return;
+    if (!mountedRef.current) return;
     
     let isMounted = true;
     const controller = new AbortController();
@@ -74,16 +82,13 @@ export function ProductCard({ product, currentLang, dict }: ProductCardProps) {
       }
     };
 
-    const timer = setTimeout(() => {
-      loadImages();
-    }, 100);
+    loadImages();
 
     return () => {
       isMounted = false;
-      clearTimeout(timer);
       controller.abort();
     };
-  }, [product.id, mounted]);
+  }, [product.id]); // ✅ CRITICAL FIX: ONLY product.id
 
   const productTitle = currentLang === "en" 
     ? (product.titleEn || product.name) 
@@ -115,15 +120,13 @@ export function ProductCard({ product, currentLang, dict }: ProductCardProps) {
     }
   }, [imageError, isPlaceholder]);
 
-  // Determine image source
   const currentImage = images[currentImageIndex] || images[0];
   const isBase64Image = currentImage?.startsWith('data:');
 
   return (
     <article className="group flex flex-col overflow-hidden rounded-2xl bg-white border border-gray-200 shadow-sm hover:shadow-lg transition-shadow duration-300">
-      {/* Image Section - Fixed aspect ratio for mobile */}
       <div className="relative aspect-square w-full overflow-hidden bg-gray-100">
-        {!mounted || (loadingImages && isPlaceholder) ? (
+        {loadingImages && isPlaceholder ? (
           <div className="flex items-center justify-center h-full">
             <div className="w-10 h-10 border-2 border-kahra_gold border-t-transparent rounded-full animate-spin" />
           </div>
@@ -148,15 +151,13 @@ export function ProductCard({ product, currentLang, dict }: ProductCardProps) {
           </>
         )}
         
-        {/* Image counter badge */}
-        {hasMultipleImages && !loadingImages && mounted && (
+        {hasMultipleImages && !loadingImages && (
           <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded-full">
             {currentImageIndex + 1} / {images.length}
           </div>
         )}
         
-        {/* Navigation buttons */}
-        {hasMultipleImages && !loadingImages && mounted && (
+        {hasMultipleImages && !loadingImages && (
           <>
             <button
               type="button"
@@ -178,7 +179,6 @@ export function ProductCard({ product, currentLang, dict }: ProductCardProps) {
         )}
       </div>
 
-      {/* Product Info - Better padding for mobile */}
       <div className="flex flex-col flex-1 p-4">
         <h2 className="text-sm sm:text-base font-semibold text-gray-800 line-clamp-2 leading-snug">
           {productTitle}

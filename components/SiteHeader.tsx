@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { getDictionary, type Dictionary } from "../lib/dictionary";
-import { Suspense, useCallback, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useState, useMemo } from "react";
 
 interface HeaderProps {
   lang?: string;
@@ -29,27 +29,30 @@ function HeaderContent({ lang }: HeaderProps) {
   
   const isHomePage = pathname === "/";
 
+  // ✅ FIX: Memoize searchParams string for stable dependency
+  const searchParamsString = useMemo(() => {
+    return searchParams.toString();
+  }, [searchParams]);
+
+  // ✅ FIX: Stable dependencies - no mounted, use searchParamsString
   const buildLink = useCallback((href: string) => {
-    if (!mounted) return href;
-    const params = new URLSearchParams(searchParams.toString());
+    const params = new URLSearchParams(searchParamsString);
     params.set("lang", currentLang);
     const query = params.toString();
     return query ? `${href}?${query}` : href;
-  }, [mounted, searchParams, currentLang]);
+  }, [searchParamsString, currentLang]);
 
+  // ✅ FIX: Stable dependencies for language toggle
   const handleLanguageToggle = useCallback(() => {
-    if (!mounted) return;
-    
-    const params = new URLSearchParams(searchParams.toString());
+    const params = new URLSearchParams(searchParamsString);
     params.set("lang", otherLang);
     const query = params.toString();
 
-    // Set cookie with proper Safari-compatible options
     document.cookie = `kahra_lang=${otherLang}; path=/; max-age=31536000; SameSite=Lax`;
 
     router.push(query ? `${pathname}?${query}` : pathname);
     setMobileMenuOpen(false);
-  }, [mounted, searchParams, otherLang, pathname, router]);
+  }, [searchParamsString, otherLang, pathname, router]);
 
   const handleMobileMenuToggle = useCallback(() => {
     setMobileMenuOpen(prev => !prev);
@@ -59,7 +62,7 @@ function HeaderContent({ lang }: HeaderProps) {
     setMobileMenuOpen(false);
   }, []);
 
-  // Static header during SSR to prevent hydration mismatch
+  // Static header during SSR
   if (!mounted) {
     return (
       <header className="border-b border-kahra_gold/20 bg-white/95 backdrop-blur-sm sticky top-0 z-50">
@@ -86,8 +89,9 @@ function HeaderContent({ lang }: HeaderProps) {
   return (
     <header className="border-b border-kahra_gold/20 bg-white/95 backdrop-blur-sm sticky top-0 z-50">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-        <Link href={buildLink("/")} className="flex items-center gap-3">
-          {!isHomePage && (
+        {/* ✅ FIX: Only render Link when NOT on homepage, so it always has content */}
+        {!isHomePage ? (
+          <Link href={buildLink("/")} className="flex items-center gap-3">
             <div className="relative h-10 w-32">
               <Image
                 src="/images/kahramani-logo.svg"
@@ -97,8 +101,12 @@ function HeaderContent({ lang }: HeaderProps) {
                 priority
               />
             </div>
-          )}
-        </Link>
+          </Link>
+        ) : (
+          <div className="flex items-center gap-3">
+            {/* Empty space on homepage for layout consistency */}
+          </div>
+        )}
 
         {/* Desktop Navigation */}
         <nav className="hidden items-center gap-6 text-sm font-medium md:flex">
@@ -206,7 +214,6 @@ function HeaderContent({ lang }: HeaderProps) {
   );
 }
 
-// Loading fallback component
 function HeaderFallback() {
   return (
     <header className="border-b border-kahra_gold/20 bg-white/95 backdrop-blur-sm sticky top-0 z-50">

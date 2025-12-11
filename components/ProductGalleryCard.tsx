@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import Image from "next/image";
 
 interface ProductGalleryCardProps {
@@ -23,17 +23,21 @@ export function ProductGalleryCard({
   isOffer = false,
 }: ProductGalleryCardProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [mounted, setMounted] = useState(false);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
-
-  // Ensure we have at least one image
-  const validImages = images && images.length > 0 ? images : ["/images/placeholder.png"];
-  const hasMultipleImages = validImages.length > 1;
+  
+  // ✅ FIX: Use useRef instead of useState for mounted flag
+  const mountedRef = useRef(false);
 
   useEffect(() => {
-    setMounted(true);
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
   }, []);
+
+  const validImages = images && images.length > 0 ? images : ["/images/placeholder.png"];
+  const hasMultipleImages = validImages.length > 1;
 
   const goToPrevious = useCallback((e?: React.MouseEvent) => {
     if (e) {
@@ -55,7 +59,6 @@ export function ProductGalleryCard({
     setCurrentIndex(index);
   }, []);
 
-  // Touch handlers for swipe support
   const minSwipeDistance = 50;
 
   const onTouchStart = useCallback((e: React.TouchEvent) => {
@@ -82,20 +85,21 @@ export function ProductGalleryCard({
     }
   }, [touchStart, touchEnd, hasMultipleImages, goToNext, goToPrevious]);
 
+  // ✅ FIX: Use mountedRef.current instead of mounted state
+  const showControls = mountedRef.current && hasMultipleImages;
+
   return (
     <article 
       className={`group flex flex-col overflow-hidden rounded-2xl bg-white border shadow-md hover:shadow-xl transition-shadow duration-300 ${
         isOffer ? "border-kahra_gold/30" : "border-gray-200"
       }`}
     >
-      {/* Image Gallery Section */}
       <div 
         className="relative aspect-square w-full overflow-hidden bg-gray-100"
         onTouchStart={hasMultipleImages ? onTouchStart : undefined}
         onTouchMove={hasMultipleImages ? onTouchMove : undefined}
         onTouchEnd={hasMultipleImages ? onTouchEnd : undefined}
       >
-        {/* Main Image */}
         <Image
           src={validImages[currentIndex]}
           alt={name}
@@ -106,17 +110,14 @@ export function ProductGalleryCard({
           loading={priority ? "eager" : "lazy"}
         />
 
-        {/* Image Counter Badge */}
-        {hasMultipleImages && mounted && (
+        {showControls && (
           <div className="absolute top-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded-full z-10">
             {currentIndex + 1} / {validImages.length}
           </div>
         )}
 
-        {/* Navigation Arrows - Only show on hover for desktop, always visible indicators on mobile */}
-        {hasMultipleImages && mounted && (
+        {showControls && (
           <>
-            {/* Left Arrow */}
             <button
               type="button"
               onClick={goToPrevious}
@@ -128,7 +129,6 @@ export function ProductGalleryCard({
               </svg>
             </button>
 
-            {/* Right Arrow */}
             <button
               type="button"
               onClick={goToNext}
@@ -142,8 +142,7 @@ export function ProductGalleryCard({
           </>
         )}
 
-        {/* Dot Indicators */}
-        {hasMultipleImages && mounted && (
+        {showControls && (
           <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
             {validImages.map((_, index) => (
               <button
@@ -161,16 +160,14 @@ export function ProductGalleryCard({
           </div>
         )}
 
-        {/* Swipe hint for mobile - shows briefly on first view */}
-        {hasMultipleImages && mounted && (
+        {showControls && (
           <div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-white/70 text-xs sm:hidden pointer-events-none">
             {currentLang === "ar" ? "اسحب للمزيد" : "Swipe for more"}
           </div>
         )}
       </div>
 
-      {/* Thumbnail Strip - Only show if more than 3 images */}
-      {validImages.length > 3 && mounted && (
+      {validImages.length > 3 && mountedRef.current && (
         <div className="flex gap-1 p-2 bg-gray-50 overflow-x-auto scrollbar-hide">
           {validImages.map((img, index) => (
             <button
@@ -195,7 +192,6 @@ export function ProductGalleryCard({
         </div>
       )}
 
-      {/* Product Info */}
       <div className="flex flex-col flex-1 p-4 sm:px-5 sm:py-4">
         <h4 className="text-sm sm:text-base font-semibold text-gray-800 line-clamp-2">
           {name}
