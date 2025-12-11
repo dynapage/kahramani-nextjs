@@ -135,21 +135,21 @@ export function HeroBackground() {
   }
 
   // Mobile or slow connection - show only static image
-  if (isMobile || connectionSpeed === 'slow') {
-    return (
-      <div className="absolute inset-0">
-        <Image
-          src="/images/hero-poster.jpg"
-          alt="Kahramani amber jewelry"
-          fill
-          priority
-          className="object-cover"
-          sizes="100vw"
-          quality={75}
-        />
-      </div>
-    );
-  }
+  // if (isMobile || connectionSpeed === 'slow') {
+  //   return (
+  //     <div className="absolute inset-0">
+  //       <Image
+  //         src="/images/hero-poster.jpg"
+  //         alt="Kahramani amber jewelry"
+  //         fill
+  //         priority
+  //         className="object-cover"
+  //         sizes="100vw"
+  //         quality={75}
+  //       />
+  //     </div>
+  //   );
+  // }
 
   // Desktop with fast connection - show video with poster fallback
   return (

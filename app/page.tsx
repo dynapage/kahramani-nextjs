@@ -47,13 +47,13 @@ export default async function Home({ searchParams }: HomeProps) {
 
         {/* Floating amber particles - DESKTOP ONLY to save mobile GPU/memory */}
         <div className="absolute inset-0 pointer-events-none hidden lg:block">
-          <div className="absolute top-20 left-[10%] w-3 h-3 bg-kahra_gold/30 rounded-full animate-amber-float-1" />
+          {/* <div className="absolute top-20 left-[10%] w-3 h-3 bg-kahra_gold/30 rounded-full animate-amber-float-1" />
           <div className="absolute top-40 right-[15%] w-2 h-2 bg-kahra_goldSoft/40 rounded-full animate-amber-float-2" />
           <div className="absolute bottom-32 left-[20%] w-4 h-4 bg-kahra_gold/20 rounded-full animate-amber-float-3" />
           <div 
             className="absolute top-60 right-[30%] w-2.5 h-2.5 bg-kahra_cream/50 rounded-full animate-amber-float-1"
             style={{ animationDelay: '2s' }} 
-          />
+          /> */}
         </div>
 
         {/* Logo section with elegant entrance */}
