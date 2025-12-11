@@ -47,13 +47,13 @@ export default async function Home({ searchParams }: HomeProps) {
 
         {/* Floating amber particles - DESKTOP ONLY to save mobile GPU/memory */}
         <div className="absolute inset-0 pointer-events-none hidden lg:block">
-          {/* <div className="absolute top-20 left-[10%] w-3 h-3 bg-kahra_gold/30 rounded-full animate-amber-float-1" />
+          <div className="absolute top-20 left-[10%] w-3 h-3 bg-kahra_gold/30 rounded-full animate-amber-float-1" />
           <div className="absolute top-40 right-[15%] w-2 h-2 bg-kahra_goldSoft/40 rounded-full animate-amber-float-2" />
           <div className="absolute bottom-32 left-[20%] w-4 h-4 bg-kahra_gold/20 rounded-full animate-amber-float-3" />
           <div 
             className="absolute top-60 right-[30%] w-2.5 h-2.5 bg-kahra_cream/50 rounded-full animate-amber-float-1"
             style={{ animationDelay: '2s' }} 
-          /> */}
+          />
         </div>
 
         {/* Logo section with elegant entrance */}
@@ -75,18 +75,7 @@ export default async function Home({ searchParams }: HomeProps) {
             className="mt-6 sm:mt-8 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 animate-fade-in-up"
             style={{ animationDelay: '0.4s' }}
           >
-            <Link
-              href={`/catalog?lang=${currentLang}`}
-              className="w-full sm:w-auto rounded-full bg-kahra_gold px-6 sm:px-8 py-3 text-sm font-semibold uppercase tracking-wider text-white shadow-lg hover:bg-kahra_gold/90 hover:shadow-xl transition-all duration-300 touch-manipulation"
-            >
-              {dict.hero.ctaPrimary}
-            </Link>
-            <Link
-              href={`/about?lang=${currentLang}`}
-              className="w-full sm:w-auto rounded-full border-2 border-kahra_gold px-6 sm:px-8 py-3 text-sm font-semibold uppercase tracking-wider text-kahra_gold hover:bg-kahra_gold hover:text-white transition-all duration-300 touch-manipulation"
-            >
-              {dict.hero.ctaSecondary}
-            </Link>
+           
           </div>
         </div>
       </section>

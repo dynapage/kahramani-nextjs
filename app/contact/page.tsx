@@ -64,7 +64,7 @@ export default async function ContactPage({ searchParams }: ContactProps) {
               <div className="flex-1 min-w-0">
                 <h3 className="font-semibold text-gray-800 mb-1 text-sm sm:text-base">WhatsApp</h3>
                 <a
-                  href="https://wa.me/96800000000"
+                  href="https://wa.me/0096898742211"
                   target="_blank"
                   rel="noreferrer"
                   className="text-green-600 hover:text-green-700 transition-colors text-xs sm:text-sm"
