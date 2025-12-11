@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { getDictionary, type Dictionary } from "../lib/dictionary";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 
 interface HeaderProps {
   lang?: string;
@@ -15,6 +15,7 @@ function HeaderContent({ lang }: HeaderProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -28,30 +29,40 @@ function HeaderContent({ lang }: HeaderProps) {
   
   const isHomePage = pathname === "/";
 
-  const buildLink = (href: string) => {
+  const buildLink = useCallback((href: string) => {
     if (!mounted) return href;
     const params = new URLSearchParams(searchParams.toString());
     params.set("lang", currentLang);
     const query = params.toString();
     return query ? `${href}?${query}` : href;
-  };
+  }, [mounted, searchParams, currentLang]);
 
-  const handleLanguageToggle = () => {
+  const handleLanguageToggle = useCallback(() => {
     if (!mounted) return;
     
     const params = new URLSearchParams(searchParams.toString());
     params.set("lang", otherLang);
     const query = params.toString();
 
+    // Set cookie with proper Safari-compatible options
     document.cookie = `kahra_lang=${otherLang}; path=/; max-age=31536000; SameSite=Lax`;
 
     router.push(query ? `${pathname}?${query}` : pathname);
-  };
+    setMobileMenuOpen(false);
+  }, [mounted, searchParams, otherLang, pathname, router]);
 
+  const handleMobileMenuToggle = useCallback(() => {
+    setMobileMenuOpen(prev => !prev);
+  }, []);
+
+  const closeMobileMenu = useCallback(() => {
+    setMobileMenuOpen(false);
+  }, []);
+
+  // Static header during SSR to prevent hydration mismatch
   if (!mounted) {
-    // Return a simplified header during SSR to prevent hydration mismatch
     return (
-      <header className="border-b border-kahra_gold/20 bg-kahra_gold/10 backdrop-blur-md sticky top-0 z-50">
+      <header className="border-b border-kahra_gold/20 bg-white/95 backdrop-blur-sm sticky top-0 z-50">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
           <div className="flex items-center gap-3">
             {!isHomePage && (
@@ -66,14 +77,14 @@ function HeaderContent({ lang }: HeaderProps) {
               </div>
             )}
           </div>
-          <div className="h-8 w-16 bg-kahra_gold/10 rounded-full animate-pulse" />
+          <div className="h-8 w-16 bg-kahra_gold/10 rounded-full" />
         </div>
       </header>
     );
   }
 
   return (
-    <header className="border-b border-kahra_gold/20 bg-kahra_gold/10 backdrop-blur-md sticky top-0 z-50">
+    <header className="border-b border-kahra_gold/20 bg-white/95 backdrop-blur-sm sticky top-0 z-50">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
         <Link href={buildLink("/")} className="flex items-center gap-3">
           {!isHomePage && (
@@ -89,28 +100,29 @@ function HeaderContent({ lang }: HeaderProps) {
           )}
         </Link>
 
+        {/* Desktop Navigation */}
         <nav className="hidden items-center gap-6 text-sm font-medium md:flex">
           <Link 
             href={buildLink("/")} 
-            className="text-gray-700 hover:text-kahra_gold transition-colors"
+            className="text-gray-700 hover:text-kahra_gold transition-colors duration-200"
           >
             {dict.nav.home}
           </Link>
           <Link 
             href={buildLink("/catalog")} 
-            className="text-gray-700 hover:text-kahra_gold transition-colors"
+            className="text-gray-700 hover:text-kahra_gold transition-colors duration-200"
           >
             {dict.nav.catalog}
           </Link>
           <Link 
             href={buildLink("/about")} 
-            className="text-gray-700 hover:text-kahra_gold transition-colors"
+            className="text-gray-700 hover:text-kahra_gold transition-colors duration-200"
           >
             {dict.nav.about}
           </Link>
           <Link 
             href={buildLink("/contact")} 
-            className="text-gray-700 hover:text-kahra_gold transition-colors"
+            className="text-gray-700 hover:text-kahra_gold transition-colors duration-200"
           >
             {dict.nav.contact}
           </Link>
@@ -120,13 +132,14 @@ function HeaderContent({ lang }: HeaderProps) {
           <button
             type="button"
             onClick={handleLanguageToggle}
-            className="rounded-full border border-kahra_gold/60 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-kahra_gold hover:bg-kahra_gold hover:text-white transition-all"
+            className="rounded-full border border-kahra_gold/60 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-kahra_gold hover:bg-kahra_gold hover:text-white transition-colors duration-200"
           >
             {dict.nav.languageShort}
           </button>
         </nav>
 
-        <div className="md:hidden">
+        {/* Mobile Menu Button */}
+        <div className="flex items-center gap-3 md:hidden">
           <button
             type="button"
             onClick={handleLanguageToggle}
@@ -134,7 +147,72 @@ function HeaderContent({ lang }: HeaderProps) {
           >
             {dict.nav.languageShort}
           </button>
+          
+          <button
+            type="button"
+            onClick={handleMobileMenuToggle}
+            className="p-2 text-gray-700 hover:text-kahra_gold"
+            aria-label="Toggle menu"
+          >
+            {mobileMenuOpen ? (
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            ) : (
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            )}
+          </button>
         </div>
+      </div>
+
+      {/* Mobile Navigation Menu */}
+      {mobileMenuOpen && (
+        <nav className="md:hidden border-t border-kahra_gold/20 bg-white/95 backdrop-blur-sm">
+          <div className="px-4 py-3 space-y-3">
+            <Link 
+              href={buildLink("/")} 
+              onClick={closeMobileMenu}
+              className="block py-2 text-gray-700 hover:text-kahra_gold transition-colors duration-200"
+            >
+              {dict.nav.home}
+            </Link>
+            <Link 
+              href={buildLink("/catalog")} 
+              onClick={closeMobileMenu}
+              className="block py-2 text-gray-700 hover:text-kahra_gold transition-colors duration-200"
+            >
+              {dict.nav.catalog}
+            </Link>
+            <Link 
+              href={buildLink("/about")} 
+              onClick={closeMobileMenu}
+              className="block py-2 text-gray-700 hover:text-kahra_gold transition-colors duration-200"
+            >
+              {dict.nav.about}
+            </Link>
+            <Link 
+              href={buildLink("/contact")} 
+              onClick={closeMobileMenu}
+              className="block py-2 text-gray-700 hover:text-kahra_gold transition-colors duration-200"
+            >
+              {dict.nav.contact}
+            </Link>
+          </div>
+        </nav>
+      )}
+    </header>
+  );
+}
+
+// Loading fallback component
+function HeaderFallback() {
+  return (
+    <header className="border-b border-kahra_gold/20 bg-white/95 backdrop-blur-sm sticky top-0 z-50">
+      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
+        <div className="h-10 w-32 bg-kahra_gold/10 rounded" />
+        <div className="h-8 w-16 bg-kahra_gold/10 rounded-full" />
       </div>
     </header>
   );
@@ -142,14 +220,7 @@ function HeaderContent({ lang }: HeaderProps) {
 
 export function SiteHeader({ lang }: HeaderProps) {
   return (
-    <Suspense fallback={
-      <header className="border-b border-kahra_gold/20 bg-kahra_gold/10 backdrop-blur-md sticky top-0 z-50">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-          <div className="h-10 w-32 bg-kahra_gold/10 rounded animate-pulse" />
-          <div className="h-8 w-16 bg-kahra_gold/10 rounded-full animate-pulse" />
-        </div>
-      </header>
-    }>
+    <Suspense fallback={<HeaderFallback />}>
       <HeaderContent lang={lang} />
     </Suspense>
   );

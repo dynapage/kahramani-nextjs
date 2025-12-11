@@ -1,6 +1,14 @@
 import "./globals.css";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import type React from "react";
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
+  themeColor: '#b88746',
+};
 
 export const metadata: Metadata = {
   title: {
@@ -28,6 +36,20 @@ export const metadata: Metadata = {
     description:
       "Authentic Baltic amber jewellery with a Middle Eastern soul. Shop rings, necklaces and sets from Oman to the GCC.",
     type: "website",
+    locale: "ar_OM",
+    alternateLocale: "en_US",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+  formatDetection: {
+    telephone: false,
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'Kahramani',
   },
 };
 
@@ -37,7 +59,19 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ar" dir="rtl">
+    <html lang="ar" dir="rtl" suppressHydrationWarning>
+      <head>
+        {/* Preconnect to external domains for faster loading */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        
+        {/* DNS prefetch for API */}
+        <link rel="dns-prefetch" href="https://apikahramani-e8eddtdchububue6.southindia-01.azurewebsites.net" />
+        
+        {/* Apple specific meta tags */}
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="mobile-web-app-capable" content="yes" />
+      </head>
       <body className="min-h-screen bg-white text-gray-800 antialiased">
         {children}
       </body>

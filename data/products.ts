@@ -84,38 +84,19 @@ export const products: Product[] = [
     priceOmr: 100,
     inStock: true,
     isBestSeller: true,
-    images: ["/images/PEN01.png"],
+    images: ["/images/pen02.png", "/images/pen03.png", "/images/pen01.png"],
   },
-
-    {
-    id: "cylinder-necklace3",
-    slug: "cylinder-necklace",
-    category: "necklaces",
-    name: {
-      ar: "قلادة نادرة من الكهرمان العنبري",
-      en: "Two-tone cylinder amber necklace",
-    },
-    shortDescription: {
-      ar: "قلادة مصاغة يدوياً من الفضة الخالصة وقطعة نادرة من الكهرمان العنبري (الكهرب) البولوني الطبيعي.",
-      en: "Creamy yellow and cherry amber in a sleek modern necklace.",
-    },
-    priceUsd: 260,
-    priceOmr: 100,
-    inStock: true,
-    isBestSeller: true,
-    images: ["/images/PEN02.png"],
-  },
-    {
+  {
     id: "cylinder-necklace4",
     slug: "cylinder-necklace",
     category: "necklaces",
     name: {
       ar: "اساور من الفضة ٩٩٥",
-      en: "Two-tone cylinder amber necklace",
+      en: "995 Silver Bracelets",
     },
     shortDescription: {
       ar: "اساور من الفضة مطعمة بتشكيلة من احجار الكهرمان البلطيقي ومصنوعة بعناية بكل تفاصيلها.",
-      en: "Creamy yellow and cherry amber in a sleek modern necklace.",
+      en: "Bracelets made of 995 silver adorned with a variety of Baltic amber stones, crafted with meticulous attention to detail.",
     },
     priceUsd: 260,
     priceOmr: 100,
@@ -124,17 +105,17 @@ export const products: Product[] = [
     images: ["/images/BR01.png", "/images/BR02.png", "/images/BR04.png"],
   },
 
-      {
+  {
     id: "cylinder-necklace5",
     slug: "cylinder-necklace",
     category: "necklaces",
     name: {
       ar: "تصاميم نادرة من الكهرمان العنبري",
-      en: "Two-tone cylinder amber necklace",
+      en: "Rare Amber Designs",
     },
     shortDescription: {
       ar: "تصاميم فريدة عملت يدوياً بمهارة عالمية في بولندا من الفضة الخالصة وقطع ثمينة واصيلة من الكهرمان العنبري (الكهرب) البولوني الطبيعي.",
-      en: "Creamy yellow and cherry amber in a sleek modern necklace.",
+      en: "Unique designs handcrafted with world-class skill in Poland from pure silver and precious authentic Polish amber (electric).",
     },
     priceUsd: 260,
     priceOmr: 100,
@@ -168,18 +149,18 @@ export const products: Product[] = [
     slug: "bracelets",
     category: "bracelets",
     name: {
-      ar: "سوار عنبر",
-      en: "Golden amber ring & pendant",
+      ar: "اكتشفي أسرار الاساور",
+      en: "Amber Bracelets",
     },
     shortDescription: {
-      ar: "سوار مركزي بتفاصيل متلألئة مع سلسلة من الفضة الخالصة المطلية بالذهب الخالص.",
-      en: "Central amber cabochon ring with matching pendant.",
+      ar: "الاساور بتفاصيل متلألئة مع الفضة الخالصة أو الفضة المطلية بالذهب الخالص.",
+      en: "Bracelets with sparkling details in pure silver or gold-plated silver.",
     },
     priceUsd: 310,
     priceOmr: 120,
     inStock: true,
     isBestSeller: true,
-    images: ["/images/hero-5.jpg", "/images/BR03.png"],
+    images: ["/images/BR05.png", "/images/BR03.png", "/images/BR06.png", "/images/BR04.png"],
   },
 
   {

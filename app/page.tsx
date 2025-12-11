@@ -1,15 +1,16 @@
 import Image from "next/image";
+import Link from "next/link";
 import { SiteHeader } from "../components/SiteHeader";
 import { SiteFooter } from "../components/SiteFooter";
 import { getDictionary } from "../lib/dictionary";
 import { Suspense } from "react";
+import { HeroBackground } from "../components/HeroBackground";
 
 import {
-  categories,
   getBestSellers,
   getOffers,
-  getProductsByCategory,
 } from "../data/products";
+import { ProductGalleryCard } from "../components/ProductGalleryCard";
 
 interface HomeProps {
   searchParams?: Promise<{ lang?: string; category?: string }>;
@@ -22,7 +23,6 @@ export default async function Home({ searchParams }: HomeProps) {
   const currentLang = dict.lang;
   const bestSellers = getBestSellers();
   const offers = getOffers();
-  const heroCategory = getProductsByCategory("necklaces")[0];
 
   const formatPrice = (usd: number, omr: number) => {
     return currentLang === "ar"
@@ -32,33 +32,33 @@ export default async function Home({ searchParams }: HomeProps) {
 
   return (
     <main className="flex min-h-screen flex-col bg-gradient-to-b from-kahra_gold/20 via-kahra_cream/5 to-white">
-      {/* HERO – Enhanced with animations */}
+      {/* HERO – Safari-compatible version */}
       <section className="relative overflow-hidden bg-gradient-to-br from-white via-kahra_cream/20 to-white border-b border-kahra_gold/10">
-        {/* Crossfading background images */}
-        <div className="absolute inset-0 opacity-80">
-          <div className="absolute inset-0 hero-fade-1">
-            <Image
-              src="/images/gen4.gif"
-              alt="Amber bracelet product shot"
-              fill
-              priority
-              className="object-cover"
-            />
-          </div>
-        </div>
+        {/* 
+          CRITICAL FIX: The GIF was crashing iOS Safari due to memory limits.
+          GIFs decompress ALL frames into memory (~500MB-2GB for animated GIFs).
+          iOS Safari has a ~1.5GB per-tab limit.
+          
+          Solution: Use HeroBackground component that:
+          - Shows MP4 video on desktop (much more memory efficient)
+          - Shows static image on mobile/iOS (safest option)
+        */}
+        <HeroBackground />
 
-   
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-20 left-[10%] w-3 h-3 bg-kahra_gold/30 rounded-full animate-amber-float-1 blur-sm" />
-          <div className="absolute top-40 right-[15%] w-2 h-2 bg-kahra_goldSoft/40 rounded-full animate-amber-float-2 blur-sm" />
-          <div className="absolute bottom-32 left-[20%] w-4 h-4 bg-kahra_gold/20 rounded-full animate-amber-float-3 blur-sm" />
-          <div className="absolute top-60 right-[30%] w-2.5 h-2.5 bg-kahra_cream/50 rounded-full animate-amber-float-1"
-            style={{ animationDelay: '2s' }} />
+        {/* Floating amber particles - DESKTOP ONLY to save mobile GPU/memory */}
+        <div className="absolute inset-0 pointer-events-none hidden lg:block">
+          {/* <div className="absolute top-20 left-[10%] w-3 h-3 bg-kahra_gold/30 rounded-full animate-amber-float-1" />
+          <div className="absolute top-40 right-[15%] w-2 h-2 bg-kahra_goldSoft/40 rounded-full animate-amber-float-2" />
+          <div className="absolute bottom-32 left-[20%] w-4 h-4 bg-kahra_gold/20 rounded-full animate-amber-float-3" />
+          <div 
+            className="absolute top-60 right-[30%] w-2.5 h-2.5 bg-kahra_cream/50 rounded-full animate-amber-float-1"
+            style={{ animationDelay: '2s' }} 
+          /> */}
         </div>
 
         {/* Logo section with elegant entrance */}
-        <div className="relative z-10 flex items-center justify-center pt-12 pb-8">
-          <div className="h-32 w-64 animate-fade-in-down">
+        <div className="relative z-10 flex items-center justify-center pt-8 sm:pt-12 pb-6 sm:pb-8">
+          <div className="h-24 w-48 sm:h-32 sm:w-64 animate-fade-in-down">
             <Image
               src="/images/kahramani-logo.svg"
               alt="Kahramani logo"
@@ -70,29 +70,23 @@ export default async function Home({ searchParams }: HomeProps) {
         </div>
 
         {/* Hero text with staggered animation */}
-        <div className="relative z-10 mx-auto max-w-4xl px-4 pb-16 text-center">
-          <h1 className="text-1xl md:text-3xl font-bold text-gray-800 animate-fade-in-up">
-            {/* <span className="text-kahra_gold">{dict.hero.titleStrong}</span>
-            <span className="text-gray-700">{dict.hero.titleRest}</span> */}
-          </h1>
-          {/* <p className="mt-6 text-base md:text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed animate-fade-in-up"
-             style={{ animationDelay: '0.2s' }}>
-            {dict.hero.subtitle}
-          </p> */}
-          <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in-up"
-            style={{ animationDelay: '0.4s' }}>
-            <a
+        <div className="relative z-10 mx-auto max-w-4xl px-4 pb-12 sm:pb-16 text-center">
+          <div 
+            className="mt-6 sm:mt-8 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 animate-fade-in-up"
+            style={{ animationDelay: '0.4s' }}
+          >
+            <Link
               href={`/catalog?lang=${currentLang}`}
-              className="rounded-full bg-kahra_gold px-8 py-3 text-sm font-semibold uppercase tracking-wider text-white shadow-lg hover:bg-kahra_gold/90 hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5"
+              className="w-full sm:w-auto rounded-full bg-kahra_gold px-6 sm:px-8 py-3 text-sm font-semibold uppercase tracking-wider text-white shadow-lg hover:bg-kahra_gold/90 hover:shadow-xl transition-all duration-300 touch-manipulation"
             >
               {dict.hero.ctaPrimary}
-            </a>
-            <a
+            </Link>
+            <Link
               href={`/about?lang=${currentLang}`}
-              className="rounded-full border-2 border-kahra_gold px-8 py-3 text-sm font-semibold uppercase tracking-wider text-kahra_gold hover:bg-kahra_gold hover:text-white transition-all duration-300"
+              className="w-full sm:w-auto rounded-full border-2 border-kahra_gold px-6 sm:px-8 py-3 text-sm font-semibold uppercase tracking-wider text-kahra_gold hover:bg-kahra_gold hover:text-white transition-all duration-300 touch-manipulation"
             >
               {dict.hero.ctaSecondary}
-            </a>
+            </Link>
           </div>
         </div>
       </section>
@@ -104,78 +98,50 @@ export default async function Home({ searchParams }: HomeProps) {
       {/* FEATURED SECTION */}
       <section
         id="featured"
-        className="mx-auto max-w-6xl px-4 py-12 md:py-16"
+        className="mx-auto w-full max-w-6xl px-4 py-8 sm:py-12 md:py-16"
       >
         <div className={dict.dir === "rtl" ? "md:pl-10 md:text-right" : "md:pr-10 md:text-left"}>
-          <a
+          <Link
             href={`/catalog?lang=${currentLang}`}
             className="text-sm font-semibold uppercase tracking-wider text-kahra_gold hover:text-kahra_gold/80 transition-colors"
           >
             {dict.featured.viewAll} →
-          </a>
+          </Link>
         </div>
-        <section id="best-sellers" className="mt-8">
-          <div className="grid gap-6 md:grid-cols-3">
+        
+        {/* Best Sellers Section - Now with multi-image gallery support */}
+        <section id="best-sellers" className="mt-6 sm:mt-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {bestSellers.map((p, idx) => (
-              <article
+              <ProductGalleryCard
                 key={p.id}
-                className="group flex flex-col overflow-hidden rounded-3xl bg-white border border-gray-200 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
-                style={{ animationDelay: `${idx * 0.1}s` }}
-              >
-                <div className="relative h-64 w-full overflow-hidden">
-                  <Image
-                    src={p.images[0]}
-                    alt={p.name[currentLang]}
-                    fill
-                    className="object-cover group-hover:scale-110 transition-transform duration-500"
-                  />
-                </div>
-                <div className="px-5 py-4">
-                  <h4 className="text-base font-semibold text-gray-800">
-                    {p.name[currentLang]}
-                  </h4>
-                  <p className="mt-2 text-sm text-gray-600 leading-relaxed">
-                    {p.shortDescription[currentLang]}
-                  </p>
-                  {/* <p className="mt-3 text-sm font-bold text-kahra_gold">
-                    {formatPrice(p.priceUsd, p.priceOmr)}
-                  </p> */}
-                </div>
-              </article>
+                images={p.images}
+                name={p.name[currentLang]}
+                description={p.shortDescription[currentLang]}
+                currentLang={currentLang}
+                priority={idx < 3}
+              />
             ))}
           </div>
         </section>
+
+        {/* Offers Section - Also with multi-image gallery support */}
         {offers.length > 0 && (
-          <section className="mt-12">
-            <h3 className="text-lg font-semibold uppercase tracking-wider text-kahra_gold mb-6">
+          <section className="mt-10 sm:mt-12">
+            <h3 className="text-base sm:text-lg font-semibold uppercase tracking-wider text-kahra_gold mb-4 sm:mb-6">
               {dict.featured.offers}
             </h3>
-            <div className="grid gap-6 md:grid-cols-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {offers.map((p) => (
-                <article
+                <ProductGalleryCard
                   key={p.id}
-                  className="group flex flex-col overflow-hidden rounded-3xl bg-white border border-kahra_gold/30 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
-                >
-                  <div className="relative h-60 w-full overflow-hidden">
-                    <Image
-                      src={p.images[0]}
-                      alt={p.name[currentLang]}
-                      fill
-                      className="object-cover group-hover:scale-110 transition-transform duration-500"
-                    />
-                  </div>
-                  <div className="px-5 py-4">
-                    <h4 className="text-base font-semibold text-gray-800">
-                      {p.name[currentLang]}
-                    </h4>
-                    <p className="mt-2 text-sm text-gray-600">
-                      {p.shortDescription[currentLang]}
-                    </p>
-                    <p className="mt-3 text-sm font-bold text-kahra_goldSoft">
-                      {formatPrice(p.priceUsd, p.priceOmr)}
-                    </p>
-                  </div>
-                </article>
+                  images={p.images}
+                  name={p.name[currentLang]}
+                  description={p.shortDescription[currentLang]}
+                  price={formatPrice(p.priceUsd, p.priceOmr)}
+                  currentLang={currentLang}
+                  isOffer
+                />
               ))}
             </div>
           </section>
@@ -185,28 +151,22 @@ export default async function Home({ searchParams }: HomeProps) {
       {/* ABOUT PREVIEW */}
       <section
         id="about-preview"
-        className="border-t border-kahra_gold/20 bg-gradient-to-br from-gray-50 to-white py-12"
+        className="border-t border-kahra_gold/20 bg-gradient-to-br from-gray-50 to-white py-10 sm:py-12"
       >
         <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 md:flex-row md:items-center md:justify-between">
           <div className="md:w-2/3">
-            <h2 className="text-2xl font-semibold text-gray-800">{dict.about.title}</h2>
-            <p className="mt-4 text-sm leading-relaxed text-gray-600">
+            <h2 className="text-xl sm:text-2xl font-semibold text-gray-800">{dict.about.title}</h2>
+            <p className="mt-3 sm:mt-4 text-sm leading-relaxed text-gray-600">
               {dict.about.paragraph1}
             </p>
           </div>
           <div className="space-y-2 text-sm text-gray-700 md:w-1/3">
-            <p className="flex items-start gap-2">
-              <span className="text-kahra_gold mt-1">✓</span>
-              <span>{dict.about.values[0]}</span>
-            </p>
-            <p className="flex items-start gap-2">
-              <span className="text-kahra_gold mt-1">✓</span>
-              <span>{dict.about.values[1]}</span>
-            </p>
-            <p className="flex items-start gap-2">
-              <span className="text-kahra_gold mt-1">✓</span>
-              <span>{dict.about.values[2]}</span>
-            </p>
+            {dict.about.values.slice(0, 3).map((value, idx) => (
+              <p key={idx} className="flex items-start gap-2">
+                <span className="text-kahra_gold mt-0.5 flex-shrink-0">✓</span>
+                <span>{value}</span>
+              </p>
+            ))}
           </div>
         </div>
       </section>
